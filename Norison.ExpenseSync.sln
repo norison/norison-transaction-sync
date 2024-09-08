@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E3E5B25A-C645-42A8-8D0E-FA233A63C533}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Norison.ExpenseSync.Functions", "src\Norison.ExpenseSync.Functions\Norison.ExpenseSync.Functions.csproj", "{960244D8-EBA9-456C-907B-A6A3783CBD83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Norison.ExpenseSync.Infrastructure", "src\Norison.ExpenseSync.Infrastructure\Norison.ExpenseSync.Infrastructure.csproj", "{276DB725-AC56-4FEC-9D93-0131FAEF8D09}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Norison.ExpenseSync.Application", "src\Norison.ExpenseSync.Application\Norison.ExpenseSync.Application.csproj", "{9365BE42-C4DA-4BBC-875E-3B138C3B7DE4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{960244D8-EBA9-456C-907B-A6A3783CBD83} = {E3E5B25A-C645-42A8-8D0E-FA233A63C533}
+		{276DB725-AC56-4FEC-9D93-0131FAEF8D09} = {E3E5B25A-C645-42A8-8D0E-FA233A63C533}
+		{9365BE42-C4DA-4BBC-875E-3B138C3B7DE4} = {E3E5B25A-C645-42A8-8D0E-FA233A63C533}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{960244D8-EBA9-456C-907B-A6A3783CBD83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{960244D8-EBA9-456C-907B-A6A3783CBD83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{960244D8-EBA9-456C-907B-A6A3783CBD83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{960244D8-EBA9-456C-907B-A6A3783CBD83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{276DB725-AC56-4FEC-9D93-0131FAEF8D09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{276DB725-AC56-4FEC-9D93-0131FAEF8D09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{276DB725-AC56-4FEC-9D93-0131FAEF8D09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{276DB725-AC56-4FEC-9D93-0131FAEF8D09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9365BE42-C4DA-4BBC-875E-3B138C3B7DE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9365BE42-C4DA-4BBC-875E-3B138C3B7DE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9365BE42-C4DA-4BBC-875E-3B138C3B7DE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9365BE42-C4DA-4BBC-875E-3B138C3B7DE4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
