@@ -12,6 +12,6 @@ public class TestFunction(ILogger<TestFunction> logger)
     {
         await Task.CompletedTask;
         logger.LogInformation("C# HTTP trigger function processed a request.");
-        return new OkObjectResult("Welcome to Azure Functions!");
+        return new OkObjectResult("Welcome to Azure Functions! This HTTP triggered function executed successfully.");
     }
 }
