@@ -27,4 +27,8 @@
     <ItemGroup>
         <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext"/>
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Norison.TransactionSync.Application\Norison.TransactionSync.Application.csproj" />
+      <ProjectReference Include="..\Norison.TransactionSync.Infrastructure\Norison.TransactionSync.Infrastructure.csproj" />
+    </ItemGroup>
 </Project>

@@ -6,4 +6,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Norison.MonoSdk" Version="1.0.2" />
+      <PackageReference Include="Norison.NotionSdk" Version="1.0.0" />
+    </ItemGroup>
+
 </Project>
