@@ -5,6 +5,7 @@
         <OutputType>Exe</OutputType>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <UserSecretsId>588dccfb-bad1-4e5c-89c0-28d3fe2d4a04</UserSecretsId>
     </PropertyGroup>
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
@@ -14,6 +15,9 @@
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.17.0"/>
         <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0"/>
         <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.2.0"/>
+        <PackageReference Include="Norison.MonoSdk" Version="1.0.2" />
+        <PackageReference Include="Norison.NotionSdk" Version="1.0.0" />
+        <PackageReference Include="Telegram.Bot" Version="21.11.0" />
     </ItemGroup>
     <ItemGroup>
         <None Update="host.json">
@@ -28,7 +32,6 @@
         <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext"/>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\Norison.TransactionSync.Application\Norison.TransactionSync.Application.csproj" />
-      <ProjectReference Include="..\Norison.TransactionSync.Infrastructure\Norison.TransactionSync.Infrastructure.csproj" />
+      <Folder Include="Services\NotionAdapter\" />
     </ItemGroup>
 </Project>
