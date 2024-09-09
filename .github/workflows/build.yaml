@@ -21,6 +21,8 @@ jobs:
           dotnet-version: 8.0.x
       - name: Add Telegram.Bot nuget source
         run: dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
+      - name: Add Github nuget source
+        run: dotnet nuget add source https://nuget.pkg.github.com/norison/index.json -n GitHub -u norison -p ${{ secrets.NUGET_PACKAGE_TOKEN }}
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
