@@ -19,6 +19,8 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+      - name: Add Telegram.Bot nuget source
+        run: dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
