@@ -30,10 +30,10 @@ jobs:
         run: |
           pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
           dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
-          dotnet nuget add source https://nuget.pkg.github.com/norison/index.json -n GitHub -u norison  ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text
+          dotnet nuget add source https://nuget.pkg.github.com/norison/index.json -n GitHub -u norison  ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
           dotnet build --configuration Release --output ./output
           popd
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:

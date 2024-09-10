@@ -1,4 +1,4 @@
-namespace Norison.TransactionSync.Functions.Models;
+namespace Norison.BankNotionConnector.Functions.Models;
 
 public class UserSetting
 {

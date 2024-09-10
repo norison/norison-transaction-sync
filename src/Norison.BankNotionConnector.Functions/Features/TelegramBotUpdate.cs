@@ -6,7 +6,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace Norison.TransactionSync.Functions.Features;
+namespace Norison.BankNotionConnector.Functions.Features;
 
 public class TelegramBotUpdate(ITelegramBotClient telegramBotClient)
 {

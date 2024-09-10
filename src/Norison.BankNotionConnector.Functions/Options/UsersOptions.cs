@@ -1,6 +1,6 @@
-using Norison.TransactionSync.Functions.Models;
+using Norison.BankNotionConnector.Functions.Models;
 
-namespace Norison.TransactionSync.Functions.Options;
+namespace Norison.BankNotionConnector.Functions.Options;
 
 public class UsersOptions
 {

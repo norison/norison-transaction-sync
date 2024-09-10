@@ -15,8 +15,6 @@
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.17.0"/>
         <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0"/>
         <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.2.0"/>
-        <PackageReference Include="Norison.MonoSdk" Version="1.0.2" />
-        <PackageReference Include="Norison.NotionSdk" Version="1.0.0" />
         <PackageReference Include="Telegram.Bot" Version="21.11.0" />
     </ItemGroup>
     <ItemGroup>
@@ -30,8 +28,5 @@
     </ItemGroup>
     <ItemGroup>
         <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext"/>
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Services\NotionAdapter\" />
     </ItemGroup>
 </Project>

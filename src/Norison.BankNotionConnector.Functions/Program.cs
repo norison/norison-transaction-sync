@@ -4,8 +4,8 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
-using Norison.TransactionSync.Functions.Models;
-using Norison.TransactionSync.Functions.Options;
+using Norison.BankNotionConnector.Functions.Models;
+using Norison.BankNotionConnector.Functions.Options;
 
 using Telegram.Bot;
 
