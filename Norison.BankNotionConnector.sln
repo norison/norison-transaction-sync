@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B9942419-FE8C-4ECC-B23C-DE7203D2FB21}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Norison.TransactionSync.Functions", "src\Norison.TransactionSync.Functions\Norison.TransactionSync.Functions.csproj", "{6D87154F-742F-4686-A42C-0B8D6622F439}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Norison.BankNotionConnector.Functions", "src\Norison.BankNotionConnector.Functions\Norison.BankNotionConnector.Functions.csproj", "{6D87154F-742F-4686-A42C-0B8D6622F439}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,7 +8,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{6D87154F-742F-4686-A42C-0B8D6622F439} = {B9942419-FE8C-4ECC-B23C-DE7203D2FB21}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{6D87154F-742F-4686-A42C-0B8D6622F439}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

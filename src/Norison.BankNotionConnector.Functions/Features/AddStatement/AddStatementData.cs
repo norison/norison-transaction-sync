@@ -1,6 +1,6 @@
 using Norison.MonoSdk.Models;
 
-namespace Norison.TransactionSync.Functions.Features.AddStatement;
+namespace Norison.BankNotionConnector.Functions.Features.AddStatement;
 
 public class AddStatementData
 {

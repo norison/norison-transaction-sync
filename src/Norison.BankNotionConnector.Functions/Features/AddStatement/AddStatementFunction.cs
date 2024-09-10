@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-using Norison.TransactionSync.Functions.Options;
+using Norison.BankNotionConnector.Functions.Options;
 
 using Telegram.Bot;
 
-namespace Norison.TransactionSync.Functions.Features.AddStatement;
+namespace Norison.BankNotionConnector.Functions.Features.AddStatement;
 
 public class AddStatementFunction(ITelegramBotClient telegramBotClient, IOptions<UsersOptions> usersOptions)
 {
