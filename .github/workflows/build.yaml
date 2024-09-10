@@ -19,13 +19,18 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
       - name: Add Telegram.Bot nuget source
         run: dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
+
       - name: Add Github nuget source
-        run: dotnet nuget add source https://nuget.pkg.github.com/norison/index.json -n GitHub -u norison -p ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text
+        run: dotnet nuget add source https://nuget.pkg.github.com/norison/index.json -n GitHub -u norison -p ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
+
       - name: Restore dependencies
         run: dotnet restore
+        
       - name: Build
         run: dotnet build --no-restore --configuration Release
+
       - name: Test
         run: dotnet test --no-build --verbosity normal
