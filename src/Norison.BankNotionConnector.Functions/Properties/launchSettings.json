@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "Norison.ExpenseSync.Functions": {
+    "Norison.BankNotionConnector.Functions": {
       "commandName": "Project",
-      "commandLineArgs": "--port 7232",
+      "commandLineArgs": "--port 7199",
       "launchBrowser": false
     }
   }

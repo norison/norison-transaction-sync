@@ -1,6 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Norison.BankNotionConnector.Functions", "src\Norison.BankNotionConnector.Functions\Norison.BankNotionConnector.Functions.csproj", "{6D87154F-742F-4686-A42C-0B8D6622F439}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Norison.BankNotionConnector.Persistence", "src\Norison.BankNotionConnector.Persistence\Norison.BankNotionConnector.Persistence.csproj", "{60FADFB7-1307-4FBB-B973-EB805AF0C81C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Norison.BankNotionConnector.Application", "src\Norison.BankNotionConnector.Application\Norison.BankNotionConnector.Application.csproj", "{BDFE4697-1BDF-4D06-807C-8DE37ADEA3A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Norison.BankNotionConnector.Functions", "src\Norison.BankNotionConnector.Functions\Norison.BankNotionConnector.Functions.csproj", "{777D7506-37D3-4ABC-A14F-E13B70664CA0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,9 +14,17 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6D87154F-742F-4686-A42C-0B8D6622F439}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D87154F-742F-4686-A42C-0B8D6622F439}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6D87154F-742F-4686-A42C-0B8D6622F439}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6D87154F-742F-4686-A42C-0B8D6622F439}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60FADFB7-1307-4FBB-B973-EB805AF0C81C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60FADFB7-1307-4FBB-B973-EB805AF0C81C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60FADFB7-1307-4FBB-B973-EB805AF0C81C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60FADFB7-1307-4FBB-B973-EB805AF0C81C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDFE4697-1BDF-4D06-807C-8DE37ADEA3A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDFE4697-1BDF-4D06-807C-8DE37ADEA3A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDFE4697-1BDF-4D06-807C-8DE37ADEA3A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDFE4697-1BDF-4D06-807C-8DE37ADEA3A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{777D7506-37D3-4ABC-A14F-E13B70664CA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{777D7506-37D3-4ABC-A14F-E13B70664CA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{777D7506-37D3-4ABC-A14F-E13B70664CA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{777D7506-37D3-4ABC-A14F-E13B70664CA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
