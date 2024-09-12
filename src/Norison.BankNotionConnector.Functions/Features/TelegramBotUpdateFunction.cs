@@ -1,14 +1,13 @@
-using System.Text.RegularExpressions;
-
 using MediatR;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
 
-using Norison.BankNotionConnector.Application.Features.Commands.AddUser;
-using Norison.BankNotionConnector.Application.Features.Commands.SetMonoWebHook;
-using Norison.BankNotionConnector.Application.Features.Queries.GetUser;
-using Norison.BankNotionConnector.Application.Features.Queries.Test;
+using Norison.BankNotionConnector.Application.Features.Disable;
+using Norison.BankNotionConnector.Application.Features.Enable;
+using Norison.BankNotionConnector.Application.Features.GetSettings;
+using Norison.BankNotionConnector.Application.Features.SetSettings;
+using Norison.BankNotionConnector.Application.Features.Verify;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -16,93 +15,102 @@ using Telegram.Bot.Types.Enums;
 
 namespace Norison.BankNotionConnector.Functions.Features;
 
-public class TelegramBotUpdateFunction(ITelegramBotClient telegramBotClient, ISender sender)
+public class TelegramBotUpdateFunction(ITelegramBotClient client, ISender sender)
 {
+    private static readonly Dictionary<long, string> LastChatCommand = new();
+
     [Function(nameof(TelegramBotUpdateFunction))]
     public async Task RunAsync(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "bot")]
         HttpRequest req, CancellationToken cancellationToken)
     {
+        var update = await req.ReadFromJsonAsync<Update>(JsonBotAPI.Options, cancellationToken);
+
+        if (update?.Type != UpdateType.Message || update.Message?.Type != MessageType.Text)
+        {
+            return;
+        }
+
         try
         {
-            var update = await req.ReadFromJsonAsync<Update>(JsonBotAPI.Options, cancellationToken);
+            var chatId = update.Message.Chat.Id;
+            var username = update.Message.Chat.Username;
+            var text = update.Message.Text!;
 
-            if (update?.Type != UpdateType.Message || update.Message?.Type != MessageType.Text)
+            if (text.StartsWith("/start"))
             {
+                LastChatCommand[chatId] = "/start";
+                await HandleStartCommandAsync(chatId, text, cancellationToken);
                 return;
             }
 
-            var text = update.Message.Text!;
+            if (text.StartsWith("/setsettings"))
+            {
+                LastChatCommand[chatId] = "/setsettings";
+                await HandleSetSettingsCommandAsync(chatId, text, cancellationToken);
+                return;
+            }
 
-            if (text == "/start")
+            if (text.StartsWith("/getsettings"))
             {
-                await HandleStartAsync(update);
-            }
-            else if (text == "/test")
-            {
-                var query = new TestQuery();
-                await sender.Send(query, cancellationToken);
-            }
-            else if (text == "/enablewebhook")
-            {
-                var command = new SetMonoWebHookCommand { Username = update.Message.Chat.Username! };
+                var command = new GetSettingsCommand { Username = username!, ChatId = chatId };
                 await sender.Send(command, cancellationToken);
+                return;
             }
-            else if (text == "/getsettings")
+
+            if (text.StartsWith("/verify"))
             {
-                var query = new GetUserQuery { Username = update.Message.Chat.Username! };
-
-                var user = await sender.Send(query, cancellationToken);
-
-
-                await telegramBotClient.SendTextMessageAsync(update.Message.Chat.Id,
-                    $"Your settings:\n\nMonobank account name: {user.MonoAccountName}\nMonobank token: {user.MonoToken}\nNotion token: {user.NotionToken}",
-                    cancellationToken: cancellationToken);
+                var command = new VerifyCommand { ChatId = chatId };
+                await sender.Send(command, cancellationToken);
+                return;
             }
-            else if (text.StartsWith("/setsettings"))
+
+            if (text.StartsWith("/enable"))
             {
-                var regex = new Regex(@"""([^""]*)""");
-                var matches = regex.Matches(text);
-
-                if (matches.Count != 3)
-                {
-                    await telegramBotClient.SendTextMessageAsync(update.Message.Chat.Id,
-                        "Invalid format. Please provide your Notion integration token and Monobank token in the following format:\n\n/setsettings \"monobank-account-name\" \"monobank-token\" \"notion-token\"");
-                    return;
-                }
-
-                var command = new AddUserCommand
-                {
-                    Username = update.Message.Chat.Username!,
-                    ChatId = update.Message.Chat.Id,
-                    MonoAccountName = matches[0].Groups[1].Value,
-                    MonoToken = matches[1].Groups[1].Value,
-                    NotionToken = matches[2].Groups[1].Value
-                };
-
-                await sender.Send(command);
+                var command = new EnableCommand { ChatId = chatId };
+                await sender.Send(command, cancellationToken);
+                return;
             }
-            else
+
+            if (text.StartsWith("/disable"))
             {
-                await telegramBotClient.SendTextMessageAsync(update.Message.Chat.Id, "I don't understand you.");
+                var command = new DisableCommand { ChatId = chatId };
+                await sender.Send(command, cancellationToken);
+                return;
             }
+
+            if (LastChatCommand.TryGetValue(chatId, out var lastCommand) && lastCommand == "/setsettings")
+            {
+                var command = new SetSettingsCommand { Username = username!, ChatId = chatId, Text = text };
+                await sender.Send(command, cancellationToken);
+                return;
+            }
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id, "I don't understand you.",
+                cancellationToken: cancellationToken);
         }
-        catch
+        catch (Exception ex)
         {
-            // ignored
+            await client.SendTextMessageAsync(update.Message.Chat.Id, $"Error: {ex.Message}",
+                cancellationToken: cancellationToken);
         }
     }
 
-    private async Task HandleStartAsync(Update update)
+    private async Task HandleStartCommandAsync(long chatId, string text, CancellationToken cancellationToken)
     {
-        var chatId = update.Message!.Chat.Id;
-        var user = update.Message!.From!;
+        const string message = "Hello! I'm a bot that can help you to sync your bank transactions with Notion.\n" +
+                               "To start, please, enter the next command /setsettings";
 
-        var message = $"Hello {user.FirstName} {user.LastName}!\n\n" +
-                      "I am a bot that helps you to connect your bank transactions to Notion.\n\n" +
-                      "To get started, please provide your Notion integration token and Monobank token in the following format:\n\n" +
-                      "/setsettings \"monobank-account-name\" \"monobank-token\" \"notion-token\"";
+        await client.SendTextMessageAsync(chatId, message, cancellationToken: cancellationToken);
+    }
 
-        await telegramBotClient.SendTextMessageAsync(chatId, message);
+    private async Task HandleSetSettingsCommandAsync(long chatId, string text, CancellationToken cancellationToken)
+    {
+        const string message = "Enter your data in the following format:\n" +
+                               "1. <notion-token>\n" +
+                               "2. <mono-token>\n" +
+                               "3. <mono-account-name>";
+
+        await client.SendTextMessageAsync(chatId, message, cancellationToken: cancellationToken);
     }
 }

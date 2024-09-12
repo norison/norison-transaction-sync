@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Norison.BankNotionConnector.Application.Features.Commands.ProcessMonoWebHookData;
+namespace Norison.BankNotionConnector.Application.Features.ProcessMonoWebHookData;
 
 public class ProcessMonoWebHookDataCommandHandler : IRequestHandler<ProcessMonoWebHookDataCommand>
 {

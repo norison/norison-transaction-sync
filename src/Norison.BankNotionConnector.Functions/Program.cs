@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Monobank.Client;
 
-using Norison.BankNotionConnector.Application.Features.Commands.AddUser;
+using Norison.BankNotionConnector.Application.Features.SetSettings;
 using Norison.BankNotionConnector.Application.Options;
 using Norison.BankNotionConnector.Persistence.Options;
 using Norison.BankNotionConnector.Persistence.Storages;
@@ -21,7 +21,7 @@ var host = new HostBuilder()
         services.AddMediatR(options =>
         {
             options.Lifetime = ServiceLifetime.Singleton;
-            options.RegisterServicesFromAssemblyContaining<AddUserCommand>();
+            options.RegisterServicesFromAssemblyContaining<SetSettingsCommand>();
         });
 
         services.AddMemoryCache();
