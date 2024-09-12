@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Monobank.Client;
 
 using Norison.BankNotionConnector.Application.Features.Commands.AddUser;
+using Norison.BankNotionConnector.Application.Options;
 using Norison.BankNotionConnector.Persistence.Options;
 using Norison.BankNotionConnector.Persistence.Storages;
 
@@ -26,14 +27,16 @@ var host = new HostBuilder()
         services.AddMemoryCache();
         services.AddSingleton<IStorageFactory, StorageFactory>();
         services.AddSingleton(MonobankClientFactory.Create());
-        
+
         services.Configure<StorageFactoryOptions>(options =>
             options.NotionToken = builder.Configuration["NotionAuthToken"]!);
+
+        services.Configure<WebHookOptions>(options =>
+            options.WebHookBaseUrl = builder.Configuration["WebHookBaseUrl"]!);
 
         var telegramBotClient = new TelegramBotClient(builder.Configuration["TelegramBotToken"]!);
         telegramBotClient.SetWebhookAsync("https://profound-roughly-goshawk.ngrok-free.app/api/bot").Wait();
         services.AddSingleton<ITelegramBotClient>(telegramBotClient);
-        
     })
     .Build();
 
