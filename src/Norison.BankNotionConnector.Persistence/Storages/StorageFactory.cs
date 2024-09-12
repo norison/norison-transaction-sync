@@ -2,10 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
 using Norison.BankNotionConnector.Persistence.Options;
-using Norison.BankNotionConnector.Persistence.Storages.Accounts;
-using Norison.BankNotionConnector.Persistence.Storages.Budgets;
-using Norison.BankNotionConnector.Persistence.Storages.Transactions;
-using Norison.BankNotionConnector.Persistence.Storages.Users;
+using Norison.BankNotionConnector.Persistence.Storages.Models;
 
 using Notion.Client;
 
@@ -19,7 +16,7 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             _ =>
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = options.Value.NotionToken });
-                return new UsersStorage(client);
+                return new Storage<UserDbModel>(client, "Users");
             })!;
     }
 
@@ -29,7 +26,7 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             _ =>
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
-                return new AccountsStorage(client);
+                return new Storage<AccountDbModel>(client, "Accounts");
             })!;
     }
 
@@ -39,7 +36,7 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             _ =>
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
-                return new TransactionsStorage(client);
+                return new Storage<TransactionDbModel>(client, "Transactions");
             })!;
     }
 
@@ -49,7 +46,7 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             _ =>
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
-                return new BudgetsStorage(client);
+                return new Storage<BudgetDbModel>(client, "Budgets");
             })!;
     }
 }

@@ -4,19 +4,19 @@ namespace Norison.BankNotionConnector.Persistence.Extensions;
 
 public static class NumberToNumberExtensions
 {
-    public static NumberPropertyValue ToNumberPropertyValue(this long number)
+    public static NumberPropertyValue? ToNumberPropertyValue(this long number)
     {
         return new NumberPropertyValue { Number = number };
     }
     
     public static NumberPropertyValue ToNumberPropertyValue(this long? number)
     {
-        return new NumberPropertyValue { Number = number };
+        return  new NumberPropertyValue { Number = number ?? 0 };
     }
 
     public static NumberPropertyValue ToNumberPropertyValue(this decimal? number)
     {
-        return new NumberPropertyValue { Number = (double?)number };
+        return new NumberPropertyValue { Number = number is null ? 0 : (double)number };
     }
 
     public static long? ToLongValue(this PropertyValue propertyValue)

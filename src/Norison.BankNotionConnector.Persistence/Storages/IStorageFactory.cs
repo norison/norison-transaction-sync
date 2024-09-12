@@ -1,7 +1,4 @@
-using Norison.BankNotionConnector.Persistence.Storages.Accounts;
-using Norison.BankNotionConnector.Persistence.Storages.Budgets;
-using Norison.BankNotionConnector.Persistence.Storages.Transactions;
-using Norison.BankNotionConnector.Persistence.Storages.Users;
+using Norison.BankNotionConnector.Persistence.Storages.Models;
 
 namespace Norison.BankNotionConnector.Persistence.Storages;
 

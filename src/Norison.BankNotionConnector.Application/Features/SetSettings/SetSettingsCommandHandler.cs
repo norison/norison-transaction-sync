@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using MediatR;
 
 using Norison.BankNotionConnector.Persistence.Storages;
-using Norison.BankNotionConnector.Persistence.Storages.Users;
+using Norison.BankNotionConnector.Persistence.Storages.Models;
 
 using Notion.Client;
 

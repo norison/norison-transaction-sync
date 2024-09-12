@@ -1,4 +1,4 @@
-namespace Norison.BankNotionConnector.Persistence.Storages.Transactions;
+namespace Norison.BankNotionConnector.Persistence.Storages.Models;
 
 public enum TransactionType
 {

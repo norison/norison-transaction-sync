@@ -33,10 +33,8 @@ var host = new HostBuilder()
 
         services.Configure<WebHookOptions>(options =>
             options.WebHookBaseUrl = builder.Configuration["WebHookBaseUrl"]!);
-
-        var telegramBotClient = new TelegramBotClient(builder.Configuration["TelegramBotToken"]!);
-        telegramBotClient.SetWebhookAsync("https://profound-roughly-goshawk.ngrok-free.app/api/bot").Wait();
-        services.AddSingleton<ITelegramBotClient>(telegramBotClient);
+        
+        services.AddSingleton<ITelegramBotClient>(new TelegramBotClient(builder.Configuration["TelegramBotToken"]!));
     })
     .Build();
 

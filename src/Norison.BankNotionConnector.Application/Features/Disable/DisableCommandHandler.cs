@@ -1,10 +1,7 @@
 using MediatR;
 
-using Microsoft.Extensions.Options;
-
 using Monobank.Client;
 
-using Norison.BankNotionConnector.Application.Options;
 using Norison.BankNotionConnector.Persistence.Storages;
 
 using Notion.Client;
