@@ -32,22 +32,15 @@ public class ProcessMonoWebHookDataCommandHandler(IStorageFactory storageFactory
             var transactionsStorage = storageFactory.GetTransactionsStorage(user.NotionToken);
             var budgetsStorage = storageFactory.GetBudgetsStorage(user.NotionToken);
 
-            var account = await accountsStorage.GetFirstAsync(
-                new DatabasesQueryParameters { Filter = new TitleFilter("Name", user.MonoAccountName) },
+            var getAccountTask = GetAccountAsync(accountsStorage, user.MonoAccountName, cancellationToken);
+            var getBudgetTask = budgetsStorage.GetFirstAsync(new DatabasesQueryParameters { PageSize = 1 },
                 cancellationToken);
 
-            if (account is null)
-            {
-                await client.SendTextMessageAsync(request.ChatId,
-                    $"Transaction '{statement.Description}' was not added. Account was not found. Use /setsettings to set them.",
-                    cancellationToken: cancellationToken);
-                return;
-            }
-
-            var budget = await budgetsStorage.GetFirstAsync(new DatabasesQueryParameters(), cancellationToken);
+            await Task.WhenAll(getAccountTask, getBudgetTask);
+            (AccountDbModel account, BudgetDbModel? budget) = (getAccountTask.Result, getBudgetTask.Result);
 
             var type = statement.Amount > 0 ? TransactionType.Income : TransactionType.Expense;
-            
+
             var amount = Math.Abs(statement.Amount / 100);
 
             var newTransaction = new TransactionDbModel
@@ -75,5 +68,20 @@ public class ProcessMonoWebHookDataCommandHandler(IStorageFactory storageFactory
                 $"Transaction '{statement.Description}' was not added. Error: {exception.Message}",
                 cancellationToken: cancellationToken);
         }
+    }
+
+    private static async Task<AccountDbModel> GetAccountAsync(IStorage<AccountDbModel> storage, string accountName,
+        CancellationToken cancellationToken)
+    {
+        var account = await storage.GetFirstAsync(
+            new DatabasesQueryParameters { Filter = new TitleFilter("Name", accountName) },
+            cancellationToken);
+
+        if (account is null)
+        {
+            throw new InvalidOperationException("Account not found.");
+        }
+
+        return account;
     }
 }

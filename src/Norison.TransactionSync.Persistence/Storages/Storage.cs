@@ -1,15 +1,23 @@
 using System.Reflection;
 
+using Microsoft.Extensions.Caching.Memory;
+
 using Norison.TransactionSync.Persistence.Attributes;
 
 using Notion.Client;
 
 namespace Norison.TransactionSync.Persistence.Storages;
 
-public class Storage<T>(INotionClient client, string databaseName) : IStorage<T> where T : IDbModel
+public class Storage<T>(INotionClient client, IMemoryCache memoryCache, string databaseName)
+    : IStorage<T> where T : IDbModel
 {
     public async Task<string> GetDatabaseIdAsync(CancellationToken cancellationToken)
     {
+        if (memoryCache.TryGetValue(databaseName, out string? databaseId))
+        {
+            return databaseId!;
+        }
+
         var database = await GetDatabaseAsync(cancellationToken);
         return database.Id;
     }
