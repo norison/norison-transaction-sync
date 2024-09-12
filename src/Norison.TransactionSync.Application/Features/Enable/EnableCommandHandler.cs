@@ -17,14 +17,16 @@ public class EnableCommandHandler(
     IStorageFactory storageFactory,
     ITelegramBotClient client,
     IMonobankClient monobankClient,
-    IOptions<WebHookOptions> options) : IRequestHandler<EnableCommand>
+    IOptions<WebHookOptions> webHookOptions,
+    IOptions<NotionOptions> notionOptions) : IRequestHandler<EnableCommand>
 {
     public async Task Handle(EnableCommand request, CancellationToken cancellationToken)
     {
         var userStorage = storageFactory.GetUsersStorage();
 
         var parameters = new DatabasesQueryParameters { Filter = new NumberFilter("ChatId", request.ChatId) };
-        var user = await userStorage.GetFirstAsync(parameters, cancellationToken);
+        var user = await userStorage.GetFirstAsync(notionOptions.Value.NotionUsersDatabaseId, parameters,
+            cancellationToken);
 
         if (user is null)
         {
@@ -32,11 +34,11 @@ public class EnableCommandHandler(
                 cancellationToken: cancellationToken);
             return;
         }
-        
-        var url = options.Value.WebHookBaseUrl + $"/monobank/{request.ChatId}";
+
+        var url = webHookOptions.Value.WebHookBaseUrl + $"/monobank/{request.ChatId}";
 
         await monobankClient.Personal.SetWebHookAsync(url, user.MonoToken, cancellationToken);
-        
+
         await client.SendTextMessageAsync(request.ChatId, "Enable command executed successfully.",
             cancellationToken: cancellationToken);
     }

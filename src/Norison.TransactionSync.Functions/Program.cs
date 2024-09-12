@@ -31,9 +31,12 @@ var host = new HostBuilder()
         services.Configure<StorageFactoryOptions>(options =>
             options.NotionToken = builder.Configuration["NotionAuthToken"]!);
 
+        services.Configure<NotionOptions>(options =>
+            options.NotionUsersDatabaseId = builder.Configuration["NotionUsersDatabaseId"]!);
+
         services.Configure<WebHookOptions>(options =>
             options.WebHookBaseUrl = builder.Configuration["WebHookBaseUrl"]!);
-        
+
         services.AddSingleton<ITelegramBotClient>(new TelegramBotClient(builder.Configuration["TelegramBotToken"]!));
     })
     .Build();

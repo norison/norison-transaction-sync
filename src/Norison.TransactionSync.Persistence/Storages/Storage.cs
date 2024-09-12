@@ -1,45 +1,29 @@
 using System.Reflection;
 
-using Microsoft.Extensions.Caching.Memory;
-
 using Norison.TransactionSync.Persistence.Attributes;
 
 using Notion.Client;
 
 namespace Norison.TransactionSync.Persistence.Storages;
 
-public class Storage<T>(INotionClient client, IMemoryCache memoryCache, string databaseName)
-    : IStorage<T> where T : IDbModel
+public class Storage<T>(INotionClient client, string databaseName) : IStorage<T> where T : IDbModel
 {
     public async Task<string> GetDatabaseIdAsync(CancellationToken cancellationToken)
     {
-        if (memoryCache.TryGetValue(databaseName, out string? databaseId))
-        {
-            return databaseId!;
-        }
-
         var database = await GetDatabaseAsync(cancellationToken);
         return database.Id;
     }
 
-    public async Task<T[]> GetAllAsync(DatabasesQueryParameters parameters, CancellationToken cancellationToken)
+    public async Task<T?> GetFirstAsync(string databaseId, DatabasesQueryParameters parameters,
+        CancellationToken cancellationToken)
     {
-        var databaseId = await GetDatabaseIdAsync(cancellationToken);
-        var pages = await client.Databases.QueryAsync(databaseId, parameters, cancellationToken);
-        return pages.Results.Select(x => ConvertPropertiesToModel(x.Id, x.Properties)).ToArray();
-    }
-
-    public async Task<T?> GetFirstAsync(DatabasesQueryParameters parameters, CancellationToken cancellationToken)
-    {
-        var databaseId = await GetDatabaseIdAsync(cancellationToken);
         var pages = await client.Databases.QueryAsync(databaseId, parameters, cancellationToken);
         var page = pages.Results.FirstOrDefault();
         return page is not null ? ConvertPropertiesToModel(page.Id, page.Properties) : default;
     }
 
-    public async Task AddAsync(T item, CancellationToken cancellationToken)
+    public async Task AddAsync(string databaseId, T item, CancellationToken cancellationToken)
     {
-        var databaseId = await GetDatabaseIdAsync(cancellationToken);
         var parameters = new PagesCreateParameters
         {
             Parent = new DatabaseParentInput { DatabaseId = databaseId },
@@ -48,7 +32,7 @@ public class Storage<T>(INotionClient client, IMemoryCache memoryCache, string d
         await client.Pages.CreateAsync(parameters, cancellationToken);
     }
 
-    public async Task UpdateAsync(T item, CancellationToken cancellationToken)
+    public async Task UpdateAsync(string databaseId, T item, CancellationToken cancellationToken)
     {
         var parameters = new PagesUpdateParameters { Properties = ConvertModelToProperties(item) };
         await client.Pages.UpdateAsync(item.Id, parameters, cancellationToken);

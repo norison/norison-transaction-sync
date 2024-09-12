@@ -1,7 +1,10 @@
 using MediatR;
 
+using Microsoft.Extensions.Options;
+
 using Monobank.Client;
 
+using Norison.TransactionSync.Application.Options;
 using Norison.TransactionSync.Persistence.Storages;
 
 using Notion.Client;
@@ -13,14 +16,15 @@ namespace Norison.TransactionSync.Application.Features.Disable;
 public class DisableCommandHandler(
     IStorageFactory storageFactory,
     ITelegramBotClient client,
-    IMonobankClient monobankClient) : IRequestHandler<DisableCommand>
+    IMonobankClient monobankClient,
+    IOptions<NotionOptions> options) : IRequestHandler<DisableCommand>
 {
     public async Task Handle(DisableCommand request, CancellationToken cancellationToken)
     {
         var userStorage = storageFactory.GetUsersStorage();
 
         var parameters = new DatabasesQueryParameters { Filter = new NumberFilter("ChatId", request.ChatId) };
-        var user = await userStorage.GetFirstAsync(parameters, cancellationToken);
+        var user = await userStorage.GetFirstAsync(options.Value.NotionUsersDatabaseId, parameters, cancellationToken);
 
         if (user is null)
         {

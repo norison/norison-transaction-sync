@@ -16,7 +16,7 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             _ =>
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = options.Value.NotionToken });
-                return new Storage<UserDbModel>(client, memoryCache, "Users");
+                return new Storage<UserDbModel>(client, "Users");
             })!;
     }
 
@@ -26,7 +26,7 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             _ =>
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
-                return new Storage<AccountDbModel>(client, memoryCache, "Accounts");
+                return new Storage<AccountDbModel>(client, "Accounts");
             })!;
     }
 
@@ -36,7 +36,7 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             _ =>
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
-                return new Storage<TransactionDbModel>(client, memoryCache, "Transactions");
+                return new Storage<TransactionDbModel>(client, "Transactions");
             })!;
     }
 
@@ -46,7 +46,7 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             _ =>
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
-                return new Storage<BudgetDbModel>(client, memoryCache, "Budgets");
+                return new Storage<BudgetDbModel>(client, "Budgets");
             })!;
     }
 }
