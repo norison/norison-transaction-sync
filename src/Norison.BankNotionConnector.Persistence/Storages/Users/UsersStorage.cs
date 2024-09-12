@@ -1,73 +1,35 @@
 using Norison.BankNotionConnector.Persistence.Extensions;
-using Norison.BankNotionConnector.Persistence.Storages.Users.Models;
 
 using Notion.Client;
 
 namespace Norison.BankNotionConnector.Persistence.Storages.Users;
 
-public class UsersStorage(INotionClient client) : StorageBase(client), IUsersStorage
+public class UsersStorage(INotionClient client) : StorageBase<UserDbModel>(client)
 {
-    private const string DatabaseName = "Users";
-    private const string UsernamePropertyName = "Username";
+    protected override string DatabaseName => "Users";
 
-    private readonly INotionClient _client = client;
-
-    public async Task<string> GetDatabaseIdAsync(CancellationToken cancellationToken)
+    protected override UserDbModel ConvertPropertiesToModel(string id, IDictionary<string, PropertyValue> properties)
     {
-        var database = await GetDatabaseAsync(DatabaseName, cancellationToken);
-        return database.Id;
-    }
-
-    public async Task<UserModel[]> GetUsersAsync(CancellationToken cancellationToken)
-    {
-        var pages = await GetPagesAsync(new DatabasesQueryParameters(), cancellationToken);
-        return pages.Select(page => page.Properties.ToUserModel()).ToArray();
-    }
-
-    public async Task<UserModel?> GetUserAsync(string username, CancellationToken cancellationToken)
-    {
-        var parameters = new DatabasesQueryParameters { Filter = new TitleFilter(UsernamePropertyName, username) };
-        var pages = await GetPagesAsync(parameters, cancellationToken);
-        return pages.FirstOrDefault()?.Properties.ToUserModel();
-    }
-
-    public async Task AddUserAsync(UserModel user, CancellationToken cancellationToken)
-    {
-        var databaseId = await GetDatabaseIdAsync(cancellationToken);
-
-        var properties = user.ToProperties();
-
-        var parameters = new PagesCreateParameters
+        return new UserDbModel
         {
-            Parent = new DatabaseParentInput { DatabaseId = databaseId }, Properties = properties
+            Id = id,
+            Username = properties["Username"].ToStringValue(),
+            ChatId = properties["ChatId"].ToLongValue(),
+            NotionToken = properties["NotionToken"].ToStringValue(),
+            MonoToken = properties["MonoToken"].ToStringValue(),
+            MonoAccountName = properties["MonoAccountName"].ToStringValue()
         };
-
-        await _client.Pages.CreateAsync(parameters, cancellationToken);
     }
 
-    public async Task UpdateUserAsync(UserModel user, CancellationToken cancellationToken)
+    protected override IDictionary<string, PropertyValue> ConvertModelToProperties(UserDbModel model)
     {
-        var queryParameters =
-            new DatabasesQueryParameters { Filter = new TitleFilter(UsernamePropertyName, user.Username) };
-
-        var pages = await GetPagesAsync(queryParameters, cancellationToken);
-
-        if (pages.Length == 0)
+        return new Dictionary<string, PropertyValue>
         {
-            throw new InvalidOperationException($"User with username '{user.Username}' does not exist.");
-        }
-
-        var pageId = pages[0].Id;
-
-        var parameters = new PagesUpdateParameters { Properties = user.ToProperties() };
-
-        await _client.Pages.UpdateAsync(pageId, parameters, cancellationToken);
-    }
-
-    private async Task<Page[]> GetPagesAsync(DatabasesQueryParameters parameters, CancellationToken cancellationToken)
-    {
-        var databaseId = await GetDatabaseIdAsync(cancellationToken);
-        var pages = await _client.Databases.QueryAsync(databaseId, parameters, cancellationToken);
-        return pages.Results.ToArray();
+            { "Username", model.Username.ToTitlePropertyValue() },
+            { "ChatId", model.ChatId.ToNumberPropertyValue() },
+            { "NotionToken", model.NotionToken.ToRichTextPropertyValue() },
+            { "MonoToken", model.MonoToken.ToRichTextPropertyValue() },
+            { "MonoAccountName", model.MonoAccountName.ToRichTextPropertyValue() }
+        };
     }
 }

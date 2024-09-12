@@ -5,6 +5,6 @@ namespace Norison.BankNotionConnector.Persistence.Storages;
 
 public interface IStorageFactory
 {
-    IUsersStorage GetUsersStorage();
-    IAccountsStorage GetAccountsStorage(string token);
+    IStorage<UserDbModel> GetUsersStorage();
+    IStorage<AccountDbModel> GetAccountsStorage(string token);
 }

@@ -1,17 +1,20 @@
 using MediatR;
 
 using Norison.BankNotionConnector.Persistence.Storages;
-using Norison.BankNotionConnector.Persistence.Storages.Users.Models;
+using Norison.BankNotionConnector.Persistence.Storages.Users;
+
+using Notion.Client;
 
 namespace Norison.BankNotionConnector.Application.Features.Queries.GetUser;
 
-public class GetUserQueryHandler(IStorageFactory storageFactory) : IRequestHandler<GetUserQuery, UserModel>
+public class GetUserQueryHandler(IStorageFactory storageFactory) : IRequestHandler<GetUserQuery, UserDbModel>
 {
-    public async Task<UserModel> Handle(GetUserQuery request, CancellationToken cancellationToken)
+    public async Task<UserDbModel> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        var userStorage = storageFactory.GetUsersStorage();
+        var usersStorage = storageFactory.GetUsersStorage();
 
-        var user = await userStorage.GetUserAsync(request.Username, cancellationToken);
+        var parameters = new DatabasesQueryParameters { Filter = new TitleFilter("Username", request.Username) };
+        var user = await usersStorage.GetFirstAsync(parameters, cancellationToken);
 
         if (user is null)
         {
