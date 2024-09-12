@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Norison.BankNotionConnector.Application.Features.Commands.SetMonoWebHook;
+namespace Norison.BankNotionConnector.Application.Features.SetMonoWebHook;
 
 public class SetMonoWebHookCommand : IRequest
 {

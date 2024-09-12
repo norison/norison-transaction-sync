@@ -2,8 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
 using Norison.BankNotionConnector.Persistence.Options;
-using Norison.BankNotionConnector.Persistence.Storages.Accounts;
-using Norison.BankNotionConnector.Persistence.Storages.Users;
+using Norison.BankNotionConnector.Persistence.Storages.Models;
 
 using Notion.Client;
 
@@ -17,7 +16,7 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             _ =>
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = options.Value.NotionToken });
-                return new UsersStorage(client);
+                return new Storage<UserDbModel>(client, "Users");
             })!;
     }
 
@@ -27,7 +26,27 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             _ =>
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
-                return new AccountsStorage(client);
+                return new Storage<AccountDbModel>(client, "Accounts");
+            })!;
+    }
+
+    public IStorage<TransactionDbModel> GetTransactionsStorage(string token)
+    {
+        return memoryCache.GetOrCreate($"TransactionsStorage_{token}",
+            _ =>
+            {
+                var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
+                return new Storage<TransactionDbModel>(client, "Transactions");
+            })!;
+    }
+
+    public IStorage<BudgetDbModel> GetBudgetsStorage(string token)
+    {
+        return memoryCache.GetOrCreate($"BudgetsStorage_{token}",
+            _ =>
+            {
+                var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
+                return new Storage<BudgetDbModel>(client, "Budgets");
             })!;
     }
 }

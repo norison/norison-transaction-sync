@@ -8,7 +8,7 @@ using Microsoft.Azure.Functions.Worker;
 
 using Monobank.Client;
 
-using Norison.BankNotionConnector.Application.Features.Commands.ProcessMonoWebHookData;
+using Norison.BankNotionConnector.Application.Features.ProcessMonoWebHookData;
 
 namespace Norison.BankNotionConnector.Functions.Features;
 
@@ -16,7 +16,7 @@ public class MonobankWebHookFunction(ISender sender)
 {
     [Function(nameof(MonobankWebHookFunction))]
     public async Task<IActionResult> RunAsync(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "monobank/{username}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "monobank/{chatId}")]
         HttpRequest req, CancellationToken cancellationToken)
     {
         if (req.Method == "GET")
@@ -33,7 +33,9 @@ public class MonobankWebHookFunction(ISender sender)
             return new BadRequestResult();
         }
 
-        var command = new ProcessMonoWebHookDataCommand { WebHookData = body.Data };
+        var chatId = long.Parse(req.RouteValues["chatId"]!.ToString()!);
+
+        var command = new ProcessMonoWebHookDataCommand { ChatId = chatId, WebHookData = body.Data };
 
         await sender.Send(command, cancellationToken);
 

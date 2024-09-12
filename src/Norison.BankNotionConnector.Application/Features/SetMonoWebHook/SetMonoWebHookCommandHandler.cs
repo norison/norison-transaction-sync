@@ -6,7 +6,7 @@ using Norison.BankNotionConnector.Persistence.Storages;
 
 using Notion.Client;
 
-namespace Norison.BankNotionConnector.Application.Features.Commands.SetMonoWebHook;
+namespace Norison.BankNotionConnector.Application.Features.SetMonoWebHook;
 
 public class SetMonoWebHookCommandHandler(IStorageFactory storageFactory, IMonobankClient monobankClient)
     : IRequestHandler<SetMonoWebHookCommand>

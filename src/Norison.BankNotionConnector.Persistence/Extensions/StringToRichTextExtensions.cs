@@ -4,7 +4,7 @@ namespace Norison.BankNotionConnector.Persistence.Extensions;
 
 public static class StringToRichTextExtensions
 {
-    public static string ToStringValue(this PropertyValue propertyValue)
+    public static string? ToStringValue(this PropertyValue propertyValue)
     {
         return propertyValue switch
         {
@@ -14,13 +14,13 @@ public static class StringToRichTextExtensions
         };
     }
 
-    public static TitlePropertyValue ToTitlePropertyValue(this string title)
+    public static TitlePropertyValue ToTitlePropertyValue(this string? title)
     {
-        return new TitlePropertyValue { Title = [new RichTextText { Text = new Text { Content = title } }] };
+        return new TitlePropertyValue { Title = [new RichTextText { Text = new Text { Content = title ?? string.Empty } }] };
     }
 
-    public static RichTextPropertyValue ToRichTextPropertyValue(this string richText)
+    public static RichTextPropertyValue ToRichTextPropertyValue(this string? richText)
     {
-        return new RichTextPropertyValue { RichText = [new RichTextText { Text = new Text { Content = richText } }] };
+        return new RichTextPropertyValue { RichText = [new RichTextText { Text = new Text { Content = richText ?? string.Empty } }] };
     }
 }
