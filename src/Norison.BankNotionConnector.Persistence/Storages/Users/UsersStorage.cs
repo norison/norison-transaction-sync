@@ -13,11 +13,11 @@ public class UsersStorage(INotionClient client) : StorageBase<UserDbModel>(clien
         return new UserDbModel
         {
             Id = id,
-            Username = properties["Username"].ToStringValue(),
-            ChatId = properties["ChatId"].ToLongValue(),
-            NotionToken = properties["NotionToken"].ToStringValue(),
-            MonoToken = properties["MonoToken"].ToStringValue(),
-            MonoAccountName = properties["MonoAccountName"].ToStringValue()
+            Username = properties["Username"].ToStringValue()!,
+            ChatId = properties["ChatId"].ToLongValue()!.Value,
+            NotionToken = properties["NotionToken"].ToStringValue()!,
+            MonoToken = properties["MonoToken"].ToStringValue()!,
+            MonoAccountName = properties["MonoAccountName"].ToStringValue()!
         };
     }
 

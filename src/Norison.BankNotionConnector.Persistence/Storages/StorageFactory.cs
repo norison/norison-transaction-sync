@@ -3,6 +3,8 @@ using Microsoft.Extensions.Options;
 
 using Norison.BankNotionConnector.Persistence.Options;
 using Norison.BankNotionConnector.Persistence.Storages.Accounts;
+using Norison.BankNotionConnector.Persistence.Storages.Budgets;
+using Norison.BankNotionConnector.Persistence.Storages.Transactions;
 using Norison.BankNotionConnector.Persistence.Storages.Users;
 
 using Notion.Client;
@@ -28,6 +30,26 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             {
                 var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
                 return new AccountsStorage(client);
+            })!;
+    }
+
+    public IStorage<TransactionDbModel> GetTransactionsStorage(string token)
+    {
+        return memoryCache.GetOrCreate($"TransactionsStorage_{token}",
+            _ =>
+            {
+                var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
+                return new TransactionsStorage(client);
+            })!;
+    }
+
+    public IStorage<BudgetDbModel> GetBudgetsStorage(string token)
+    {
+        return memoryCache.GetOrCreate($"BudgetsStorage_{token}",
+            _ =>
+            {
+                var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
+                return new BudgetsStorage(client);
             })!;
     }
 }
