@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using MediatR;
 
 using Norison.TransactionSync.Persistence.Storages;
@@ -6,6 +8,7 @@ using Norison.TransactionSync.Persistence.Storages.Models;
 using Notion.Client;
 
 using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 
 namespace Norison.TransactionSync.Application.Features.ProcessMonoWebHookData;
 
@@ -14,20 +17,26 @@ public class ProcessMonoWebHookDataCommandHandler(IStorageFactory storageFactory
 {
     public async Task Handle(ProcessMonoWebHookDataCommand request, CancellationToken cancellationToken)
     {
-        var userStorage = storageFactory.GetUsersStorage();
-
-        var user = await userStorage.GetFirstAsync(
-            new DatabasesQueryParameters { Filter = new NumberFilter("ChatId", request.ChatId) }, cancellationToken);
-
-        if (user is null)
-        {
-            return;
-        }
-
-        var statement = request.WebHookData.StatementItem;
-
         try
         {
+            var statement = request.WebHookData.StatementItem;
+
+            await client.SendTextMessageAsync(request.ChatId, JsonSerializer.Serialize(statement),
+                cancellationToken: cancellationToken);
+
+            return;
+
+            var userStorage = storageFactory.GetUsersStorage();
+
+            var user = await userStorage.GetFirstAsync(
+                new DatabasesQueryParameters { Filter = new NumberFilter("ChatId", request.ChatId) },
+                cancellationToken);
+
+            if (user is null)
+            {
+                return;
+            }
+
             var accountsStorage = storageFactory.GetAccountsStorage(user.NotionToken);
             var transactionsStorage = storageFactory.GetTransactionsStorage(user.NotionToken);
             var budgetsStorage = storageFactory.GetBudgetsStorage(user.NotionToken);
@@ -65,7 +74,7 @@ public class ProcessMonoWebHookDataCommandHandler(IStorageFactory storageFactory
         catch (Exception exception)
         {
             await client.SendTextMessageAsync(request.ChatId,
-                $"Transaction '{statement.Description}' was not added. Error: {exception.Message}",
+                $"Transaction was not added. Error: {exception.Message}",
                 cancellationToken: cancellationToken);
         }
     }
