@@ -43,7 +43,7 @@ public class ProcessMonoWebHookDataCommandHandler(
 
             var type = statement.Amount > 0 ? TransactionType.Income : TransactionType.Expense;
 
-            var amount = Math.Abs(statement.Amount / 100);
+            var amount = Math.Abs(statement.Amount) / 100m;
 
             var newTransaction = new TransactionDbModel
             {
