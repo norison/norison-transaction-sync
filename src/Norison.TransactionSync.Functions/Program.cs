@@ -1,3 +1,5 @@
+using Azure.Messaging.ServiceBus;
+
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,6 +8,7 @@ using Monobank.Client;
 
 using Norison.TransactionSync.Application.Features.SetSettings;
 using Norison.TransactionSync.Application.Options;
+using Norison.TransactionSync.Application.Services.UserInfos;
 using Norison.TransactionSync.Persistence.Options;
 using Norison.TransactionSync.Persistence.Storages;
 
@@ -27,6 +30,7 @@ var host = new HostBuilder()
         services.AddMemoryCache();
         services.AddSingleton<IStorageFactory, StorageFactory>();
         services.AddSingleton(MonobankClientFactory.Create());
+        services.AddSingleton<IUserInfosService, UserInfosService>();
 
         services.Configure<StorageFactoryOptions>(options =>
             options.NotionToken = builder.Configuration["NotionAuthToken"]!);
@@ -38,6 +42,8 @@ var host = new HostBuilder()
             options.WebHookBaseUrl = builder.Configuration["WebHookBaseUrl"]!);
 
         services.AddSingleton<ITelegramBotClient>(new TelegramBotClient(builder.Configuration["TelegramBotToken"]!));
+
+        services.AddSingleton(new ServiceBusClient(builder.Configuration["ServiceBusConnectionString"]));
     })
     .Build();
 

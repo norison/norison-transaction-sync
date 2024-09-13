@@ -49,4 +49,34 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
                 return new Storage<BudgetDbModel>(client, "Budgets");
             })!;
     }
+
+    public IStorage<CategoryDbModel> GetCategoriesStorage(string token)
+    {
+        return memoryCache.GetOrCreate($"CategoriesStorage_{token}",
+            _ =>
+            {
+                var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
+                return new Storage<CategoryDbModel>(client, "Categories");
+            })!;
+    }
+
+    public IStorage<CurrencyDbModel> GetCurrenciesStorage(string token)
+    {
+        return memoryCache.GetOrCreate($"CurrenciesStorage_{token}",
+            _ =>
+            {
+                var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
+                return new Storage<CurrencyDbModel>(client, "Currencies");
+            })!;
+    }
+
+    public IStorage<AutomationsDbModel> GetAutomationsStorage(string token)
+    {
+        return memoryCache.GetOrCreate($"AutomationsStorage_{token}",
+            _ =>
+            {
+                var client = NotionClientFactory.Create(new ClientOptions { AuthToken = token });
+                return new Storage<AutomationsDbModel>(client, "Automations");
+            })!;
+    }
 }

@@ -6,6 +6,7 @@ using Microsoft.Azure.Functions.Worker;
 using Norison.TransactionSync.Application.Features.Disable;
 using Norison.TransactionSync.Application.Features.Enable;
 using Norison.TransactionSync.Application.Features.GetSettings;
+using Norison.TransactionSync.Application.Features.Refresh;
 using Norison.TransactionSync.Application.Features.SetSettings;
 
 using Telegram.Bot;
@@ -53,6 +54,13 @@ public class TelegramBotUpdateFunction(ITelegramBotClient client, ISender sender
             if (text.StartsWith("/getsettings"))
             {
                 var command = new GetSettingsCommand { Username = username!, ChatId = chatId };
+                await sender.Send(command, cancellationToken);
+                return;
+            }
+
+            if (text.StartsWith("/refresh"))
+            {
+                var command = new RefreshCommand { ChatId = chatId };
                 await sender.Send(command, cancellationToken);
                 return;
             }

@@ -20,15 +20,9 @@ public class UserDbModel : IDbModel
     [NotionProperty("MonoToken", PropertyType.RichText)]
     public string MonoToken { get; set; } = string.Empty;
 
-    [NotionProperty("MonoAccountId", PropertyType.RichText)]
-    public string MonoAccountId { get; set; } = string.Empty;
-    
-    [NotionProperty("AccountsDatabaseId", PropertyType.RichText)]
-    public string AccountsDatabaseId { get; set; } = string.Empty;
-    
-    [NotionProperty("BudgetsDatabaseId", PropertyType.RichText)]
-    public string BudgetsDatabaseId { get; set; } = string.Empty;
-    
-    [NotionProperty("TransactionsDatabaseId", PropertyType.RichText)]
-    public string TransactionsDatabaseId { get; set; } = string.Empty;
+    [NotionProperty("MonoAccountName", PropertyType.RichText)]
+    public string MonoAccountName { get; set; } = string.Empty;
+
+    [NotionProperty("Data", PropertyType.RichText)]
+    public string Data { get; set; } = string.Empty;
 }
