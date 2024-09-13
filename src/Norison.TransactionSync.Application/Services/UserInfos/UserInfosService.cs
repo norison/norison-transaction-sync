@@ -125,7 +125,6 @@ public class UserInfosService(
 
     public async Task RefreshUserAsync(long chatId, CancellationToken cancellationToken)
     {
-        var userStorage = storageFactory.GetUsersStorage();
         var user = await GetUserAsync(chatId, cancellationToken);
 
         if (user is null)
