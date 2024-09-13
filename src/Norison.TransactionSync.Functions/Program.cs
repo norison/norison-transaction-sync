@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Monobank.Client;
 
-using Norison.TransactionSync.Application.Features.SetSettings;
+using Norison.TransactionSync.Application.Features.Commands.SetSettings;
 using Norison.TransactionSync.Application.Options;
 using Norison.TransactionSync.Application.Services.UserInfos;
 using Norison.TransactionSync.Persistence.Options;

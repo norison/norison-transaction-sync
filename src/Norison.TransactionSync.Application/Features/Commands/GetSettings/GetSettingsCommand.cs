@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Norison.TransactionSync.Application.Features.GetSettings;
+namespace Norison.TransactionSync.Application.Features.Commands.GetSettings;
 
 public class GetSettingsCommand : IRequest
 {

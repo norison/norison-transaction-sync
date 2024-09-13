@@ -2,7 +2,7 @@ using MediatR;
 
 using Monobank.Client;
 
-namespace Norison.TransactionSync.Application.Features.ProcessMonoWebHookData;
+namespace Norison.TransactionSync.Application.Features.Commands.ProcessMonoWebHookData;
 
 public class ProcessMonoWebHookDataCommand : IRequest
 {

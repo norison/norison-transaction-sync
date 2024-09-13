@@ -2,18 +2,11 @@ using System.Text.RegularExpressions;
 
 using MediatR;
 
-using Microsoft.Extensions.Options;
-
-using Norison.TransactionSync.Application.Options;
 using Norison.TransactionSync.Application.Services.UserInfos;
-using Norison.TransactionSync.Persistence.Storages;
-using Norison.TransactionSync.Persistence.Storages.Models;
-
-using Notion.Client;
 
 using Telegram.Bot;
 
-namespace Norison.TransactionSync.Application.Features.SetSettings;
+namespace Norison.TransactionSync.Application.Features.Commands.SetSettings;
 
 public class SetSettingsCommandHandler(ITelegramBotClient telegramBotClient, IUserInfosService userInfosService)
     : IRequestHandler<SetSettingsCommand>

@@ -4,7 +4,7 @@ using Norison.TransactionSync.Application.Services.UserInfos;
 
 using Telegram.Bot;
 
-namespace Norison.TransactionSync.Application.Features.Refresh;
+namespace Norison.TransactionSync.Application.Features.Commands.Refresh;
 
 public class RefreshCommandHandler(IUserInfosService userInfosService, ITelegramBotClient telegramBotClient)
     : IRequestHandler<RefreshCommand>

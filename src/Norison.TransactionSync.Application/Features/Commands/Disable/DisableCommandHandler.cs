@@ -11,7 +11,7 @@ using Notion.Client;
 
 using Telegram.Bot;
 
-namespace Norison.TransactionSync.Application.Features.Disable;
+namespace Norison.TransactionSync.Application.Features.Commands.Disable;
 
 public class DisableCommandHandler(
     IStorageFactory storageFactory,

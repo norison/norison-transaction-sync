@@ -13,7 +13,7 @@ using Notion.Client;
 
 using Telegram.Bot;
 
-namespace Norison.TransactionSync.Application.Features.ProcessMonoWebHookData;
+namespace Norison.TransactionSync.Application.Features.Commands.ProcessMonoWebHookData;
 
 public class ProcessMonoWebHookDataCommandHandler(
     IStorageFactory storageFactory,

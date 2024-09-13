@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Norison.TransactionSync.Application.Features.Enable;
+namespace Norison.TransactionSync.Application.Features.Commands.Enable;
 
 public class EnableCommand : IRequest
 {

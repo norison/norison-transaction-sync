@@ -1,4 +1,3 @@
-using Norison.TransactionSync.Application.Models;
 using Norison.TransactionSync.Persistence.Storages.Models;
 
 namespace Norison.TransactionSync.Application.Services.UserInfos;

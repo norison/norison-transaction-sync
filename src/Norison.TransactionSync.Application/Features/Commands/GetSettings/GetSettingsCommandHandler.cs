@@ -1,16 +1,10 @@
 using MediatR;
 
-using Microsoft.Extensions.Options;
-
-using Norison.TransactionSync.Application.Options;
 using Norison.TransactionSync.Application.Services.UserInfos;
-using Norison.TransactionSync.Persistence.Storages;
-
-using Notion.Client;
 
 using Telegram.Bot;
 
-namespace Norison.TransactionSync.Application.Features.GetSettings;
+namespace Norison.TransactionSync.Application.Features.Commands.GetSettings;
 
 public class GetSettingsCommandHandler(
     IUserInfosService userInfosService,

@@ -4,7 +4,7 @@ using MediatR;
 
 using Microsoft.Azure.Functions.Worker;
 
-using Norison.TransactionSync.Application.Features.ProcessMonoWebHookData;
+using Norison.TransactionSync.Application.Features.Commands.ProcessMonoWebHookData;
 using Norison.TransactionSync.Functions.Models;
 
 namespace Norison.TransactionSync.Functions.Features;

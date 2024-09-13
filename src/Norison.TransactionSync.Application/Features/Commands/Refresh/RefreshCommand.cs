@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Norison.TransactionSync.Application.Features.Refresh;
+namespace Norison.TransactionSync.Application.Features.Commands.Refresh;
 
 public class RefreshCommand : IRequest
 {
