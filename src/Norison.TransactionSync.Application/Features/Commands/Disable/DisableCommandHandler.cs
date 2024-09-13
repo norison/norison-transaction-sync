@@ -1,41 +1,23 @@
 using MediatR;
 
-using Microsoft.Extensions.Options;
-
 using Monobank.Client;
 
-using Norison.TransactionSync.Application.Options;
-using Norison.TransactionSync.Persistence.Storages;
-
-using Notion.Client;
-
-using Telegram.Bot;
+using Norison.TransactionSync.Application.Services.Users;
 
 namespace Norison.TransactionSync.Application.Features.Commands.Disable;
 
-public class DisableCommandHandler(
-    IStorageFactory storageFactory,
-    ITelegramBotClient client,
-    IMonobankClient monobankClient,
-    IOptions<NotionOptions> options) : IRequestHandler<DisableCommand>
+public class DisableCommandHandler(IUsersService usersService, IMonobankClient monobankClient)
+    : IRequestHandler<DisableCommand>
 {
     public async Task Handle(DisableCommand request, CancellationToken cancellationToken)
     {
-        var userStorage = storageFactory.GetUsersStorage();
-
-        var parameters = new DatabasesQueryParameters { Filter = new NumberFilter("ChatId", request.ChatId) };
-        var user = await userStorage.GetFirstAsync(options.Value.NotionUsersDatabaseId, parameters, cancellationToken);
+        var user = await usersService.GetUserByChatIdAsync(request.ChatId, cancellationToken);
 
         if (user is null)
         {
-            await client.SendTextMessageAsync(request.ChatId, "Settings were not found. Use /setsettings to set them.",
-                cancellationToken: cancellationToken);
-            return;
+            throw new InvalidOperationException("User not found.");
         }
 
         await monobankClient.Personal.SetWebHookAsync("", user.MonoToken, cancellationToken);
-
-        await client.SendTextMessageAsync(request.ChatId, "Disable command executed successfully.",
-            cancellationToken: cancellationToken);
     }
 }
