@@ -38,15 +38,16 @@ public class TelegramUpdateNotificationHandler(ITelegramBotClient client, ISende
         }
     }
 
-    private async Task<TelegramCommandResponse> HandleUpdateAsync(long chatId, string username, string text,
-        CancellationToken cancellationToken)
+    private async Task<TelegramCommandResponse> HandleUpdateAsync(
+        long chatId, string username, string text, CancellationToken cancellationToken)
     {
         return text switch
         {
             "/start" => HandleStartCommandAsync(),
             "/enable" => await HandleEnableCommandAsync(chatId, cancellationToken),
             "/disable" => await HandleDisableCommandAsync(chatId, cancellationToken),
-            _ when text.StartsWith("1.") => await HandleSetSettingsCommandAsync(chatId, username, cancellationToken),
+            _ when text.StartsWith("1.") => await HandleSetSettingsCommandAsync(chatId, username, text,
+                cancellationToken),
             _ => new TelegramCommandResponse { Message = "I don't understand your command." }
         };
     }
@@ -63,26 +64,26 @@ public class TelegramUpdateNotificationHandler(ITelegramBotClient client, ISende
         };
     }
 
-    private async Task<TelegramCommandResponse> HandleEnableCommandAsync(long chatId,
-        CancellationToken cancellationToken)
+    private async Task<TelegramCommandResponse> HandleEnableCommandAsync(
+        long chatId, CancellationToken cancellationToken)
     {
         var command = new EnableCommand { ChatId = chatId };
         await sender.Send(command, cancellationToken);
         return new TelegramCommandResponse { Message = "Monobank synchronization is enabled." };
     }
 
-    private async Task<TelegramCommandResponse> HandleDisableCommandAsync(long chatId,
-        CancellationToken cancellationToken)
+    private async Task<TelegramCommandResponse> HandleDisableCommandAsync(
+        long chatId, CancellationToken cancellationToken)
     {
         var command = new DisableCommand { ChatId = chatId };
         await sender.Send(command, cancellationToken);
         return new TelegramCommandResponse { Message = "Monobank synchronization is disabled." };
     }
 
-    private async Task<TelegramCommandResponse> HandleSetSettingsCommandAsync(long chatId, string username,
-        CancellationToken cancellationToken)
+    private async Task<TelegramCommandResponse> HandleSetSettingsCommandAsync(
+        long chatId, string username, string text, CancellationToken cancellationToken)
     {
-        var command = new SetSettingsCommand { ChatId = chatId, Username = username };
+        SetSettingsCommand command = new() { ChatId = chatId, Username = username, Text = text };
         await sender.Send(command, cancellationToken);
         return new TelegramCommandResponse { Message = "The setting has been added successfully." };
     }
