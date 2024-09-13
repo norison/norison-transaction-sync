@@ -16,8 +16,4 @@
       <ProjectReference Include="..\Norison.TransactionSync.Persistence\Norison.TransactionSync.Persistence.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Features\Commands\" />
-    </ItemGroup>
-
 </Project>

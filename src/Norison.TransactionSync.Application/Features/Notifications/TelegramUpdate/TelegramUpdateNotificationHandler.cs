@@ -1,7 +1,11 @@
 using MediatR;
 
+using Norison.TransactionSync.Application.Features.Commands;
+using Norison.TransactionSync.Application.Features.Commands.Disable;
+using Norison.TransactionSync.Application.Features.Commands.Enable;
+using Norison.TransactionSync.Application.Features.Commands.SetSettings;
+
 using Telegram.Bot;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace Norison.TransactionSync.Application.Features.Notifications.TelegramUpdate;
@@ -11,7 +15,7 @@ public class TelegramUpdateNotificationHandler(ITelegramBotClient client, ISende
 {
     public async Task Handle(TelegramUpdateNotification notification, CancellationToken cancellationToken)
     {
-        if (!ShouldHandleUpdate(notification.Update))
+        if (notification.Update is not { Type: UpdateType.Message, Message.Type: MessageType.Text })
         {
             return;
         }
@@ -22,7 +26,8 @@ public class TelegramUpdateNotificationHandler(ITelegramBotClient client, ISende
 
         try
         {
-            await HandleUpdateAsync(chatId, text, cancellationToken);
+            var response = await HandleUpdateAsync(chatId, text, cancellationToken);
+            await client.SendTextMessageAsync(chatId, response.Message, cancellationToken: cancellationToken);
         }
         catch (Exception exception)
         {
@@ -32,22 +37,52 @@ public class TelegramUpdateNotificationHandler(ITelegramBotClient client, ISende
         }
     }
 
-    private async Task HandleUpdateAsync(long chatId, string text, CancellationToken cancellationToken)
+    private async Task<TelegramCommandResponse> HandleUpdateAsync(long chatId, string text,
+        CancellationToken cancellationToken)
     {
-        switch (text)
+        return text switch
         {
-            case "/start":
-                await HandleStartCommandAsync(chatId, text, cancellationToken);
-                break;
-        }
+            "/start" => HandleStartCommandAsync(),
+            "/enable" => await HandleEnableCommandAsync(chatId, cancellationToken),
+            "/disable" => await HandleDisableCommandAsync(chatId, cancellationToken),
+            _ when text.StartsWith("1.") => await HandleSetSettingsCommandAsync(chatId, cancellationToken),
+            _ => new TelegramCommandResponse { Message = "I don't understand your command." }
+        };
     }
 
-    private async Task HandleStartCommandAsync(long chatId, string text, CancellationToken cancellationToken)
+    private static TelegramCommandResponse HandleStartCommandAsync()
     {
+        return new TelegramCommandResponse
+        {
+            Message =
+                "Welcome to the Transaction Sync bot. To provide your integration data please enter them in the following format:\n\n" +
+                "1. <your-notion-token>\n" +
+                "2. <your-monobank-token>\n" +
+                "3. <your-monobank-account-name>\n"
+        };
     }
 
-    private static bool ShouldHandleUpdate(Update update)
+    private async Task<TelegramCommandResponse> HandleEnableCommandAsync(long chatId,
+        CancellationToken cancellationToken)
     {
-        return update is { Type: UpdateType.Message, Message.Type: MessageType.Text };
+        var command = new EnableCommand { ChatId = chatId };
+        await sender.Send(command, cancellationToken);
+        return new TelegramCommandResponse { Message = "Monobank synchronization is enabled." };
+    }
+
+    private async Task<TelegramCommandResponse> HandleDisableCommandAsync(long chatId,
+        CancellationToken cancellationToken)
+    {
+        var command = new DisableCommand { ChatId = chatId };
+        await sender.Send(command, cancellationToken);
+        return new TelegramCommandResponse { Message = "Monobank synchronization is disabled." };
+    }
+
+    private async Task<TelegramCommandResponse> HandleSetSettingsCommandAsync(long chatId,
+        CancellationToken cancellationToken)
+    {
+        var command = new SetSettingsCommand { ChatId = chatId };
+        await sender.Send(command, cancellationToken);
+        return new TelegramCommandResponse { Message = "The setting has been added successfully." };
     }
 }
