@@ -24,8 +24,6 @@ public class ProcessMonoWebHookDataCommandHandler(
     {
         try
         {
-            var statement = request.WebHookData.StatementItem;
-
             var userStorage = storageFactory.GetUsersStorage();
 
             var user = await userStorage.GetFirstAsync(
@@ -39,6 +37,13 @@ public class ProcessMonoWebHookDataCommandHandler(
             }
 
             var userInfo = JsonSerializer.Deserialize<UserInfo>(user.Data)!;
+
+            if (request.WebHookData.Account != userInfo.MonoAccountBankId)
+            {
+                return;
+            }
+
+            var statement = request.WebHookData.StatementItem;
 
             var transactionsStorage = storageFactory.GetTransactionsStorage(user.NotionToken);
             var budgetsStorage = storageFactory.GetBudgetsStorage(user.NotionToken);
