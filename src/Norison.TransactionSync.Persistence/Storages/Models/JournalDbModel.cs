@@ -4,7 +4,7 @@ using Notion.Client;
 
 namespace Norison.TransactionSync.Persistence.Storages.Models;
 
-public class LogDbModel : IDbModel
+public class JournalDbModel : IDbModel
 {
     public string? Id { get; set; }
     public string? IconUrl { get; set; }

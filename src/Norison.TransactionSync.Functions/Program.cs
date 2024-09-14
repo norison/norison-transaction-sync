@@ -8,7 +8,7 @@ using Monobank.Client;
 
 using Norison.TransactionSync.Application.Features.Commands.SetSettings;
 using Norison.TransactionSync.Application.Options;
-using Norison.TransactionSync.Application.Services.Logs;
+using Norison.TransactionSync.Application.Services.Journal;
 using Norison.TransactionSync.Application.Services.Messages;
 using Norison.TransactionSync.Application.Services.Users;
 using Norison.TransactionSync.Persistence.Options;
@@ -34,7 +34,7 @@ var host = new HostBuilder()
         services.AddSingleton(MonobankClientFactory.Create());
         services.AddSingleton<IUsersService, UsersService>();
         services.AddSingleton<IMessagesService, MessagesService>();
-        services.AddSingleton<ILogsService, LogsService>();
+        services.AddSingleton<IJournalService, JournalService>();
 
         services.Configure<StorageFactoryOptions>(options =>
             options.NotionToken = builder.Configuration["NotionAuthToken"]!);
@@ -42,7 +42,7 @@ var host = new HostBuilder()
         services.Configure<NotionOptions>(options =>
         {
             options.NotionUsersDatabaseId = builder.Configuration["NotionUsersDatabaseId"]!;
-            options.NotionLogsDatabaseId = builder.Configuration["NotionLogsDatabaseId"]!;
+            options.NotionJournalsDatabaseId = builder.Configuration["NotionJournalsDatabaseId"]!;
         });
 
         services.Configure<WebHookOptions>(options =>

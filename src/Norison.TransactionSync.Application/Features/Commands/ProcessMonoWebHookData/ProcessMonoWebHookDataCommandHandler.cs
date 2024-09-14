@@ -5,7 +5,7 @@ using MediatR;
 using Monobank.Client;
 
 using Norison.TransactionSync.Application.Models;
-using Norison.TransactionSync.Application.Services.Logs;
+using Norison.TransactionSync.Application.Services.Journal;
 using Norison.TransactionSync.Application.Services.Messages;
 using Norison.TransactionSync.Application.Services.Users;
 using Norison.TransactionSync.Persistence.Storages;
@@ -19,7 +19,7 @@ public class ProcessMonoWebHookDataCommandHandler(
     IStorageFactory storageFactory,
     IUsersService usersService,
     IMessagesService messagesService,
-    ILogsService logsService) : IRequestHandler<ProcessMonoWebHookDataCommand>
+    IJournalService journalService) : IRequestHandler<ProcessMonoWebHookDataCommand>
 {
     public async Task Handle(ProcessMonoWebHookDataCommand request, CancellationToken cancellationToken)
     {
@@ -45,19 +45,20 @@ public class ProcessMonoWebHookDataCommandHandler(
             }
             catch (Exception exception)
             {
-                await logsService.LogTransactionErrorAsync(user.Username, request.WebHookData.StatementItem, exception,
+                await journalService.LogTransactionErrorAsync(user.Username, request.WebHookData.StatementItem,
+                    exception,
                     cancellationToken);
                 throw;
             }
 
             await messagesService.SendMessageAsync(request.ChatId,
-                "Monobank webhook data was processed successfully.",
+                $"Monobank transaction processed: {request.WebHookData.StatementItem.Description}",
                 cancellationToken);
         }
         catch (Exception exception)
         {
             await messagesService.SendMessageAsync(request.ChatId,
-                "Failed to process Monobank webhook data. Error: " + exception.Message,
+                "Failed to process Monobank transaction. Error: " + exception.Message,
                 cancellationToken);
         }
     }
@@ -155,7 +156,7 @@ public class ProcessMonoWebHookDataCommandHandler(
     {
         try
         {
-            await logsService.LogTransactionAsync(username, statement, transaction, cancellationToken);
+            await journalService.LogTransactionAsync(username, statement, transaction, cancellationToken);
         }
         catch
         {
