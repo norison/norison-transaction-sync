@@ -20,6 +20,16 @@ public class StorageFactory(IMemoryCache memoryCache, IOptions<StorageFactoryOpt
             })!;
     }
 
+    public IStorage<LogDbModel> GetLogsStorage()
+    {
+        return memoryCache.GetOrCreate("LogsStorage",
+            _ =>
+            {
+                var client = NotionClientFactory.Create(new ClientOptions { AuthToken = options.Value.NotionToken });
+                return new Storage<LogDbModel>(client, "Logs");
+            })!;
+    }
+
     public IStorage<AccountDbModel> GetAccountsStorage(string token)
     {
         return memoryCache.GetOrCreate($"AccountsStorage_{token}",
