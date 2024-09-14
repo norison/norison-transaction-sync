@@ -7,6 +7,7 @@ namespace Norison.TransactionSync.Persistence.Storages.Models;
 public class UserDbModel : IDbModel
 {
     public string? Id { get; set; }
+    public string? IconUrl { get; set; }
 
     [NotionProperty("Username", PropertyType.Title)]
     public string Username { get; set; } = string.Empty;

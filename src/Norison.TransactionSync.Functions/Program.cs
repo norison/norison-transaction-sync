@@ -6,9 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Monobank.Client;
 
-using Norison.TransactionSync.Application.Features.SetSettings;
+using Norison.TransactionSync.Application.Features.Commands.SetSettings;
 using Norison.TransactionSync.Application.Options;
-using Norison.TransactionSync.Application.Services.UserInfos;
+using Norison.TransactionSync.Application.Services.Messages;
+using Norison.TransactionSync.Application.Services.Users;
 using Norison.TransactionSync.Persistence.Options;
 using Norison.TransactionSync.Persistence.Storages;
 
@@ -30,7 +31,8 @@ var host = new HostBuilder()
         services.AddMemoryCache();
         services.AddSingleton<IStorageFactory, StorageFactory>();
         services.AddSingleton(MonobankClientFactory.Create());
-        services.AddSingleton<IUserInfosService, UserInfosService>();
+        services.AddSingleton<IUsersService, UsersService>();
+        services.AddSingleton<IMessagesService, MessagesService>();
 
         services.Configure<StorageFactoryOptions>(options =>
             options.NotionToken = builder.Configuration["NotionAuthToken"]!);
