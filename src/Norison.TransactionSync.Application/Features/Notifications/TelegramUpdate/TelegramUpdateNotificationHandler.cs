@@ -27,8 +27,8 @@ public class TelegramUpdateNotificationHandler(ITelegramBotClient client, ISende
 
         try
         {
-            var response = await HandleUpdateAsync(chatId, username, text, cancellationToken);
-            await client.SendTextMessageAsync(chatId, response.Message, cancellationToken: cancellationToken);
+            var responseMessage = await HandleUpdateAsync(chatId, username, text, cancellationToken);
+            await client.SendTextMessageAsync(chatId, responseMessage, cancellationToken: cancellationToken);
         }
         catch (Exception exception)
         {
@@ -38,7 +38,7 @@ public class TelegramUpdateNotificationHandler(ITelegramBotClient client, ISende
         }
     }
 
-    private async Task<TelegramCommandResponse> HandleUpdateAsync(
+    private async Task<string> HandleUpdateAsync(
         long chatId, string username, string text, CancellationToken cancellationToken)
     {
         return text switch
@@ -48,43 +48,40 @@ public class TelegramUpdateNotificationHandler(ITelegramBotClient client, ISende
             "/disable" => await HandleDisableCommandAsync(chatId, cancellationToken),
             _ when text.StartsWith("1.") => await HandleSetSettingsCommandAsync(chatId, username, text,
                 cancellationToken),
-            _ => new TelegramCommandResponse { Message = "I don't understand your command." }
+            _ => "I don't understand your command."
         };
     }
 
-    private static TelegramCommandResponse HandleStartCommandAsync()
+    private static string HandleStartCommandAsync()
     {
-        return new TelegramCommandResponse
-        {
-            Message =
-                "Welcome to the Transaction Sync bot. To provide your integration data please enter them in the following format:\n\n" +
-                "1. <your-notion-token>\n" +
-                "2. <your-monobank-token>\n" +
-                "3. <your-monobank-account-name>\n"
-        };
+        return
+            "Welcome to the Transaction Sync bot. To provide your integration data please enter them in the following format:\n\n" +
+            "1. <your-notion-token>\n" +
+            "2. <your-monobank-token>\n" +
+            "3. <your-monobank-account-name>\n";
     }
 
-    private async Task<TelegramCommandResponse> HandleEnableCommandAsync(
+    private async Task<string> HandleEnableCommandAsync(
         long chatId, CancellationToken cancellationToken)
     {
         var command = new EnableCommand { ChatId = chatId };
         await sender.Send(command, cancellationToken);
-        return new TelegramCommandResponse { Message = "Monobank synchronization is enabled." };
+        return "Monobank synchronization is enabled.";
     }
 
-    private async Task<TelegramCommandResponse> HandleDisableCommandAsync(
+    private async Task<string> HandleDisableCommandAsync(
         long chatId, CancellationToken cancellationToken)
     {
         var command = new DisableCommand { ChatId = chatId };
         await sender.Send(command, cancellationToken);
-        return new TelegramCommandResponse { Message = "Monobank synchronization is disabled." };
+        return "Monobank synchronization is disabled.";
     }
 
-    private async Task<TelegramCommandResponse> HandleSetSettingsCommandAsync(
+    private async Task<string> HandleSetSettingsCommandAsync(
         long chatId, string username, string text, CancellationToken cancellationToken)
     {
         SetSettingsCommand command = new() { ChatId = chatId, Username = username, Text = text };
         await sender.Send(command, cancellationToken);
-        return new TelegramCommandResponse { Message = "The setting has been added successfully." };
+        return "The setting has been added successfully.";
     }
 }
