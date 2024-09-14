@@ -14,31 +14,43 @@ public class Storage<T>(INotionClient client, string databaseName) : IStorage<T>
         return database.Id;
     }
 
-    public async Task<T?> GetFirstAsync(string databaseId, DatabasesQueryParameters parameters,
-        CancellationToken cancellationToken)
+    public async Task<T[]> GetAllAsync(
+        string databaseId, DatabasesQueryParameters? parameters = null, CancellationToken cancellationToken = default)
     {
+        parameters ??= new DatabasesQueryParameters();
         var pages = await client.Databases.QueryAsync(databaseId, parameters, cancellationToken);
-        var page = pages.Results.FirstOrDefault();
-        return page is not null ? ConvertPropertiesToModel(page.Id, page.Properties) : default;
+        return pages.Results.Select(ConvertPropertiesToModel).ToArray();
     }
 
-    public async Task AddAsync(string databaseId, T item, CancellationToken cancellationToken)
+    public async Task<T?> GetFirstAsync(
+        string databaseId, DatabasesQueryParameters? parameters = null, CancellationToken cancellationToken = default)
+    {
+        parameters ??= new DatabasesQueryParameters();
+        var pages = await client.Databases.QueryAsync(databaseId, parameters, cancellationToken);
+        var page = pages.Results.FirstOrDefault();
+        return page is not null ? ConvertPropertiesToModel(page) : default;
+    }
+
+    public async Task AddAsync(string databaseId, T item, CancellationToken cancellationToken = default)
     {
         var parameters = new PagesCreateParameters
         {
             Parent = new DatabaseParentInput { DatabaseId = databaseId },
+            Icon = string.IsNullOrEmpty(item.IconUrl)
+                ? null
+                : new ExternalFile { External = new ExternalFile.Info { Url = item.IconUrl } },
             Properties = ConvertModelToProperties(item)
         };
         await client.Pages.CreateAsync(parameters, cancellationToken);
     }
 
-    public async Task UpdateAsync(string databaseId, T item, CancellationToken cancellationToken)
+    public async Task UpdateAsync(string databaseId, T item, CancellationToken cancellationToken = default)
     {
         var parameters = new PagesUpdateParameters { Properties = ConvertModelToProperties(item) };
         await client.Pages.UpdateAsync(item.Id, parameters, cancellationToken);
     }
 
-    private async Task<Database> GetDatabaseAsync(CancellationToken cancellationToken)
+    private async Task<Database> GetDatabaseAsync(CancellationToken cancellationToken = default)
     {
         var parameters = new SearchParameters
         {
@@ -85,7 +97,7 @@ public class Storage<T>(INotionClient client, string databaseName) : IStorage<T>
         return result;
     }
 
-    private static T ConvertPropertiesToModel(string id, IDictionary<string, PropertyValue> properties)
+    private static T ConvertPropertiesToModel(Page page)
     {
         var model = Activator.CreateInstance<T>();
 
@@ -100,18 +112,28 @@ public class Storage<T>(INotionClient client, string databaseName) : IStorage<T>
                 continue;
             }
 
-            if (!properties.TryGetValue(attribute.Name, out var propertyValue))
+            if (!page.Properties.TryGetValue(attribute.Name, out var propertyValue))
             {
                 continue;
             }
 
             var value = ConvertPropertyValueToValue(attribute.Type, propertyValue);
             var targetType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-            var convertedValue = value is null ? null : Convert.ChangeType(value, targetType);
+
+            object? convertedValue = null;
+
+            if (value is not null)
+            {
+                convertedValue = targetType.IsEnum
+                    ? Enum.Parse(targetType, value.ToString()!)
+                    : Convert.ChangeType(value, targetType);
+            }
+
             property.SetValue(model, convertedValue);
         }
 
-        model.Id = id;
+        model.Id = page.Id;
+        model.IconUrl = (page.Icon as ExternalFile)?.External.Url;
 
         return model;
     }

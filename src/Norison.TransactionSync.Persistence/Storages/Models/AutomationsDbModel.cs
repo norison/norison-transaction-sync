@@ -7,6 +7,7 @@ namespace Norison.TransactionSync.Persistence.Storages.Models;
 public class AutomationsDbModel : IDbModel
 {
     public string? Id { get; set; }
+    public string? IconUrl { get; set; }
 
     [NotionProperty("Name", PropertyType.Title)]
     public string? Name { get; set; }
@@ -25,6 +26,9 @@ public class AutomationsDbModel : IDbModel
 
     [NotionProperty("Category", PropertyType.Relation)]
     public string[] CategoryIds { get; set; } = [];
+
+    [NotionProperty("Account From", PropertyType.Relation)]
+    public string[] AccountFromIds { get; set; } = [];
 
     [NotionProperty("Account To", PropertyType.Relation)]
     public string[] AccountToIds { get; set; } = [];

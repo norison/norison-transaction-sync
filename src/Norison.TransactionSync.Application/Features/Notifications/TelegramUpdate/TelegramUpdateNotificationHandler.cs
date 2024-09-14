@@ -1,6 +1,5 @@
 using MediatR;
 
-using Norison.TransactionSync.Application.Features.Commands;
 using Norison.TransactionSync.Application.Features.Commands.Disable;
 using Norison.TransactionSync.Application.Features.Commands.Enable;
 using Norison.TransactionSync.Application.Features.Commands.SetSettings;
