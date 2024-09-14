@@ -5,6 +5,7 @@ using MediatR;
 using Monobank.Client;
 
 using Norison.TransactionSync.Application.Models;
+using Norison.TransactionSync.Application.Services.Journal;
 using Norison.TransactionSync.Application.Services.Messages;
 using Norison.TransactionSync.Application.Services.Users;
 using Norison.TransactionSync.Persistence.Storages;
@@ -17,7 +18,8 @@ namespace Norison.TransactionSync.Application.Features.Commands.ProcessMonoWebHo
 public class ProcessMonoWebHookDataCommandHandler(
     IStorageFactory storageFactory,
     IUsersService usersService,
-    IMessagesService messagesService) : IRequestHandler<ProcessMonoWebHookDataCommand>
+    IMessagesService messagesService,
+    IJournalService journalService) : IRequestHandler<ProcessMonoWebHookDataCommand>
 {
     public async Task Handle(ProcessMonoWebHookDataCommand request, CancellationToken cancellationToken)
     {
@@ -37,16 +39,26 @@ public class ProcessMonoWebHookDataCommandHandler(
                 return;
             }
 
-            await HandleInternalAsync(user, userInfo, request.WebHookData.StatementItem, cancellationToken);
+            try
+            {
+                await HandleInternalAsync(user, userInfo, request.WebHookData.StatementItem, cancellationToken);
+            }
+            catch (Exception exception)
+            {
+                await journalService.LogTransactionErrorAsync(user.Username, request.WebHookData.StatementItem,
+                    exception,
+                    cancellationToken);
+                throw;
+            }
 
             await messagesService.SendMessageAsync(request.ChatId,
-                "Monobank webhook data was processed successfully.",
+                $"Monobank transaction processed: {request.WebHookData.StatementItem.Description}",
                 cancellationToken);
         }
         catch (Exception exception)
         {
             await messagesService.SendMessageAsync(request.ChatId,
-                "Failed to process Monobank webhook data. Error: " + exception.Message,
+                "Failed to process Monobank transaction. Error: " + exception.Message,
                 cancellationToken);
         }
     }
@@ -96,6 +108,8 @@ public class ProcessMonoWebHookDataCommandHandler(
         };
 
         await transactionsStorage.AddAsync(userInfo.TransactionsDatabaseId, newTransaction, cancellationToken);
+
+        await LogTransactionAsync(user.Username, statement, newTransaction, cancellationToken);
     }
 
     private async Task<string?> GetLastBudgetIdAsync(
@@ -134,5 +148,19 @@ public class ProcessMonoWebHookDataCommandHandler(
         }
 
         return null;
+    }
+
+    private async Task LogTransactionAsync(
+        string username, Statement statement, TransactionDbModel transaction,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await journalService.LogTransactionAsync(username, statement, transaction, cancellationToken);
+        }
+        catch
+        {
+            // do nothing
+        }
     }
 }
