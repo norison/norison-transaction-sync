@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 
 using Microsoft.Extensions.Options;
@@ -12,6 +13,11 @@ namespace Norison.TransactionSync.Application.Services.Journal;
 
 public class JournalService(IStorageFactory storageFactory, IOptions<NotionOptions> options) : IJournalService
 {
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, WriteIndented = true,
+    };
+
     public async Task LogTransactionAsync(
         string username, Statement statement, TransactionDbModel transaction,
         CancellationToken cancellationToken = default)
@@ -21,8 +27,8 @@ public class JournalService(IStorageFactory storageFactory, IOptions<NotionOptio
         var log = new JournalDbModel
         {
             Username = username,
-            Statement = JsonSerializer.Serialize(statement),
-            Transaction = JsonSerializer.Serialize(transaction)
+            Statement = JsonSerializer.Serialize(statement, _jsonSerializerOptions),
+            Transaction = JsonSerializer.Serialize(transaction, _jsonSerializerOptions)
         };
 
         await storage.AddAsync(options.Value.NotionJournalsDatabaseId, log, cancellationToken);
@@ -36,7 +42,7 @@ public class JournalService(IStorageFactory storageFactory, IOptions<NotionOptio
         var log = new JournalDbModel
         {
             Username = username,
-            Statement = JsonSerializer.Serialize(statement),
+            Statement = JsonSerializer.Serialize(statement, _jsonSerializerOptions),
             Error = exception.ToString()
         };
 
