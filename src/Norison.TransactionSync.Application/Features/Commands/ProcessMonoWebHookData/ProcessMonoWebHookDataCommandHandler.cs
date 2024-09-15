@@ -94,12 +94,14 @@ public class ProcessMonoWebHookDataCommandHandler(
 
         var lastBudgetId = await GetLastBudgetIdAsync(user, userInfo, cancellationToken);
 
+        var dateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(statement.Time, "Europe/Kiev");
+
         var newTransaction = new TransactionDbModel
         {
             IconUrl = "https://www.notion.so/icons/receipt_gray.svg",
             Name = description,
             Type = type,
-            Date = ConvertDateTime(statement.Time),
+            Date = DateTime.SpecifyKind(dateTime, DateTimeKind.Local),
             AmountFrom = amountFrom,
             AmountTo = amountTo,
             Notes = statement.Comment,
@@ -122,12 +124,6 @@ public class ProcessMonoWebHookDataCommandHandler(
         var parameters = new DatabasesQueryParameters { PageSize = 1 };
         var budget = await storage.GetFirstAsync(userInfo.BudgetsDatabaseId, parameters, cancellationToken);
         return budget?.Id;
-    }
-
-    private static DateTime ConvertDateTime(DateTime dateTime)
-    {
-        var ukraineTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Kiev");
-        return TimeZoneInfo.ConvertTimeFromUtc(dateTime, ukraineTimeZone);
     }
 
     private static AutomationsDbModel? FindAutomationForStatement(AutomationsDbModel[] automations, Statement statement)
