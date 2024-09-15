@@ -5,14 +5,14 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-
-using Monobank.Client;
+using Microsoft.Extensions.Options;
 
 using Norison.TransactionSync.Functions.Models;
+using Norison.TransactionSync.Functions.Options;
 
 namespace Norison.TransactionSync.Functions.Features;
 
-public class MonobankWebHookFunction(ServiceBusClient busClient)
+public class MonobankWebHookFunction(ServiceBusClient busClient, IOptions<QueueOptions> options)
 {
     [Function(nameof(MonobankWebHookFunction))]
     public async Task<IActionResult> RunAsync(
@@ -25,22 +25,19 @@ public class MonobankWebHookFunction(ServiceBusClient busClient)
             return new OkResult();
         }
 
-        var bodyString = await new StreamReader(req.Body).ReadToEndAsync(cancellationToken);
+        using var reader = new StreamReader(req.Body);
 
-        var body = JsonSerializer.Deserialize<WebHookModel>(bodyString);
-
-        if (body is null)
+        var @event = new TransactionEvent
         {
-            return new BadRequestResult();
-        }
+            ChatId = long.Parse(req.RouteValues["chatId"]!.ToString()!),
+            Data = await reader.ReadToEndAsync(cancellationToken)
+        };
 
-        var chatId = long.Parse(req.RouteValues["chatId"]!.ToString()!);
-
-        var @event = new TransactionEvent { ChatId = chatId, WebHookData = body.Data };
-
-        var sender = busClient.CreateSender("transactionsqueue");
         var message = new ServiceBusMessage(JsonSerializer.Serialize(@event));
-        await sender.SendMessageAsync(message, cancellationToken);
+
+        await busClient
+            .CreateSender(options.Value.TransactionsQueueName)
+            .SendMessageAsync(message, cancellationToken);
 
         return new OkResult();
     }
