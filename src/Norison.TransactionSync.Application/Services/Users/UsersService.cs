@@ -10,12 +10,17 @@ namespace Norison.TransactionSync.Application.Services.Users;
 
 public class UsersService(IStorageFactory storageFactory, IOptions<NotionOptions> options) : IUsersService
 {
+    public async Task<UserDbModel[]> GetAllUsersAsync(CancellationToken cancellationToken = default)
+    {
+        var storage = storageFactory.GetUsersStorage();
+        var usersDatabaseId = options.Value.NotionUsersDatabaseId;
+        return await storage.GetAllAsync(usersDatabaseId, cancellationToken: cancellationToken);
+    }
+
     public async Task<UserDbModel?> GetUserByChatIdAsync(long chatId, CancellationToken cancellationToken = default)
     {
         var storage = storageFactory.GetUsersStorage();
-
         var usersDatabaseId = options.Value.NotionUsersDatabaseId;
-
         var parameters = new DatabasesQueryParameters { Filter = new NumberFilter(nameof(UserDbModel.ChatId), chatId) };
         return await storage.GetFirstAsync(usersDatabaseId, parameters, cancellationToken);
     }
@@ -23,9 +28,7 @@ public class UsersService(IStorageFactory storageFactory, IOptions<NotionOptions
     public async Task SetUserAsync(UserDbModel user, CancellationToken cancellationToken = default)
     {
         var storage = storageFactory.GetUsersStorage();
-
         var usersDatabaseId = options.Value.NotionUsersDatabaseId;
-
         var existingUser = await GetUserByChatIdAsync(user.ChatId, cancellationToken);
 
         if (existingUser is null)
