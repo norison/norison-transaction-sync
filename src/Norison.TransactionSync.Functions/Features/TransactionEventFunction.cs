@@ -4,8 +4,6 @@ using Mediator;
 
 using Microsoft.Azure.Functions.Worker;
 
-using Monobank.Client;
-
 using Norison.TransactionSync.Application.Features.Commands.ProcessMonoWebHookData;
 using Norison.TransactionSync.Functions.Models;
 
@@ -25,14 +23,7 @@ public class TransactionEventFunction(ISender sender)
             return;
         }
 
-        var webHookData = JsonSerializer.Deserialize<WebHookModel>(@event.Data);
-
-        if (webHookData is null)
-        {
-            return;
-        }
-
-        var command = new ProcessMonoWebHookDataCommand { ChatId = @event.ChatId, WebHookData = webHookData.Data };
+        var command = new ProcessMonoWebHookDataCommand { ChatId = @event.ChatId, WebHookData = @event.Data };
         await sender.Send(command, cancellationToken);
     }
 }

@@ -38,8 +38,8 @@ public class UpdateCurrencyRatesCommandHandler(
         var eur = currencies.First(x => x is { CurrencyCodeA: EurCurrencyCode, CurrencyCodeB: UahCurrencyCode });
         var usd = currencies.First(x => x is { CurrencyCodeA: UsdCurrencyCode, CurrencyCodeB: UahCurrencyCode });
 
-        var eurRate = Convert.ToDecimal(eur.RateSell);
-        var usdRate = Convert.ToDecimal(usd.RateSell);
+        var eurRate = Convert.ToDecimal(eur.RateBuy);
+        var usdRate = Convert.ToDecimal(usd.RateBuy);
 
         foreach (var user in users)
         {
