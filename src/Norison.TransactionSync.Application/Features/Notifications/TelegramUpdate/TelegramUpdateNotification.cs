@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 
 using Telegram.Bot.Types;
 

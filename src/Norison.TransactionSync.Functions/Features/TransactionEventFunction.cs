@@ -1,8 +1,10 @@
 using System.Text.Json;
 
-using MediatR;
+using Mediator;
 
 using Microsoft.Azure.Functions.Worker;
+
+using Monobank.Client;
 
 using Norison.TransactionSync.Application.Features.Commands.ProcessMonoWebHookData;
 using Norison.TransactionSync.Functions.Models;
@@ -13,7 +15,7 @@ public class TransactionEventFunction(ISender sender)
 {
     [Function(nameof(TransactionEventFunction))]
     public async Task RunAsync(
-        [ServiceBusTrigger("transactionsqueue", Connection = "ServiceBusConnectionString")]
+        [ServiceBusTrigger("%TransactionsQueueName%", Connection = "ServiceBusConnectionString")]
         string message, CancellationToken cancellationToken)
     {
         var @event = JsonSerializer.Deserialize<TransactionEvent>(message);
@@ -23,8 +25,14 @@ public class TransactionEventFunction(ISender sender)
             return;
         }
 
-        var command = new ProcessMonoWebHookDataCommand { ChatId = @event.ChatId, WebHookData = @event.WebHookData };
+        var webHookData = JsonSerializer.Deserialize<WebHookModel>(@event.Data);
 
+        if (webHookData is null)
+        {
+            return;
+        }
+
+        var command = new ProcessMonoWebHookDataCommand { ChatId = @event.ChatId, WebHookData = webHookData.Data };
         await sender.Send(command, cancellationToken);
     }
 }

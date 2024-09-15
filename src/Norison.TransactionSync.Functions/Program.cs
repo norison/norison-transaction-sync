@@ -6,11 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Monobank.Client;
 
-using Norison.TransactionSync.Application.Features.Commands.SetSettings;
 using Norison.TransactionSync.Application.Options;
 using Norison.TransactionSync.Application.Services.Journal;
 using Norison.TransactionSync.Application.Services.Messages;
 using Norison.TransactionSync.Application.Services.Users;
+using Norison.TransactionSync.Functions.Options;
 using Norison.TransactionSync.Persistence.Options;
 using Norison.TransactionSync.Persistence.Storages;
 
@@ -23,15 +23,11 @@ var host = new HostBuilder()
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
 
-        services.AddMediatR(options =>
-        {
-            options.Lifetime = ServiceLifetime.Singleton;
-            options.RegisterServicesFromAssemblyContaining<SetSettingsCommand>();
-        });
+        services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Singleton);
 
         services.AddMemoryCache();
-        services.AddSingleton<IStorageFactory, StorageFactory>();
         services.AddSingleton(MonobankClientFactory.Create());
+        services.AddSingleton<IStorageFactory, StorageFactory>();
         services.AddSingleton<IUsersService, UsersService>();
         services.AddSingleton<IMessagesService, MessagesService>();
         services.AddSingleton<IJournalService, JournalService>();
@@ -47,6 +43,9 @@ var host = new HostBuilder()
 
         services.Configure<WebHookOptions>(options =>
             options.WebHookBaseUrl = builder.Configuration["WebHookBaseUrl"]!);
+
+        services.Configure<QueueOptions>(options =>
+            options.TransactionsQueueName = builder.Configuration["TransactionsQueueName"]!);
 
         services.AddSingleton<ITelegramBotClient>(new TelegramBotClient(builder.Configuration["TelegramBotToken"]!));
 

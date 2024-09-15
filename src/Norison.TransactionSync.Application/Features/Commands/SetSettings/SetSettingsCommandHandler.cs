@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-using MediatR;
+using Mediator;
 
 using Monobank.Client;
 
@@ -17,9 +17,9 @@ namespace Norison.TransactionSync.Application.Features.Commands.SetSettings;
 public partial class SetSettingsCommandHandler(
     IStorageFactory storageFactory,
     IUsersService usersService,
-    IMonobankClient monobankClient) : IRequestHandler<SetSettingsCommand>
+    IMonobankClient monobankClient) : ICommandHandler<SetSettingsCommand>
 {
-    public async Task Handle(SetSettingsCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(SetSettingsCommand request, CancellationToken cancellationToken)
     {
         if (!SettingsRegex().IsMatch(request.Text))
         {
@@ -36,6 +36,8 @@ public partial class SetSettingsCommandHandler(
         await PopulateUserDataAsync(user, cancellationToken);
 
         await usersService.SetUserAsync(user, cancellationToken);
+
+        return Unit.Value;
     }
 
     private async Task PopulateUserDataAsync(UserDbModel user, CancellationToken cancellationToken)

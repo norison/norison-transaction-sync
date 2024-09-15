@@ -1,8 +1,8 @@
-using MediatR;
+using Mediator;
 
 namespace Norison.TransactionSync.Application.Features.Commands.SetSettings;
 
-public class SetSettingsCommand : IRequest
+public class SetSettingsCommand : ICommand
 {
     public long ChatId { get; set; }
     public string Username { get; set; } = string.Empty;

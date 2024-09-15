@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 
 using Microsoft.Extensions.Options;
 
@@ -12,9 +12,9 @@ namespace Norison.TransactionSync.Application.Features.Commands.Enable;
 public class EnableCommandHandler(
     IUsersService usersService,
     IMonobankClient monobankClient,
-    IOptions<WebHookOptions> webHookOptions) : IRequestHandler<EnableCommand>
+    IOptions<WebHookOptions> webHookOptions) : ICommandHandler<EnableCommand>
 {
-    public async Task Handle(EnableCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(EnableCommand request, CancellationToken cancellationToken)
     {
         var user = await usersService.GetUserByChatIdAsync(request.ChatId, cancellationToken);
 
@@ -25,5 +25,7 @@ public class EnableCommandHandler(
 
         var url = $"{webHookOptions.Value.WebHookBaseUrl}/monobank/{request.ChatId}";
         await monobankClient.Personal.SetWebHookAsync(url, user.MonoToken, cancellationToken);
+        
+        return Unit.Value;
     }
 }

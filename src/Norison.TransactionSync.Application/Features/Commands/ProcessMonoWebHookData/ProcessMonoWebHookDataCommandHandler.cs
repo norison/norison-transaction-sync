@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-using MediatR;
+using Mediator;
 
 using Monobank.Client;
 
@@ -19,9 +19,9 @@ public class ProcessMonoWebHookDataCommandHandler(
     IStorageFactory storageFactory,
     IUsersService usersService,
     IMessagesService messagesService,
-    IJournalService journalService) : IRequestHandler<ProcessMonoWebHookDataCommand>
+    IJournalService journalService) : ICommandHandler<ProcessMonoWebHookDataCommand>
 {
-    public async Task Handle(ProcessMonoWebHookDataCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(ProcessMonoWebHookDataCommand request, CancellationToken cancellationToken)
     {
         try
         {
@@ -36,7 +36,7 @@ public class ProcessMonoWebHookDataCommandHandler(
 
             if (request.WebHookData.Account != userInfo.MonoAccountBankId)
             {
-                return;
+                return Unit.Value;
             }
 
             try
@@ -61,6 +61,8 @@ public class ProcessMonoWebHookDataCommandHandler(
                 "Failed to process Monobank transaction. Error: " + exception.Message,
                 cancellationToken);
         }
+
+        return Unit.Value;
     }
 
     private async Task HandleInternalAsync(

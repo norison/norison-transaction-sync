@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 
 using Norison.TransactionSync.Application.Features.Commands.Disable;
 using Norison.TransactionSync.Application.Features.Commands.Enable;
@@ -12,7 +12,7 @@ namespace Norison.TransactionSync.Application.Features.Notifications.TelegramUpd
 public class TelegramUpdateNotificationHandler(ITelegramBotClient client, ISender sender)
     : INotificationHandler<TelegramUpdateNotification>
 {
-    public async Task Handle(TelegramUpdateNotification notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(TelegramUpdateNotification notification, CancellationToken cancellationToken)
     {
         if (notification.Update is not { Type: UpdateType.Message, Message.Type: MessageType.Text })
         {
