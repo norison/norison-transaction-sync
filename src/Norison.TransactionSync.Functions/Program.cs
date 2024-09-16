@@ -10,7 +10,6 @@ using Norison.TransactionSync.Application.Options;
 using Norison.TransactionSync.Application.Services.Journal;
 using Norison.TransactionSync.Application.Services.Messages;
 using Norison.TransactionSync.Application.Services.Users;
-using Norison.TransactionSync.Functions.Options;
 using Norison.TransactionSync.Persistence.Options;
 using Norison.TransactionSync.Persistence.Storages;
 
@@ -43,9 +42,6 @@ var host = new HostBuilder()
 
         services.Configure<WebHookOptions>(options =>
             options.WebHookBaseUrl = builder.Configuration["WebHookBaseUrl"]!);
-
-        services.Configure<QueueOptions>(options =>
-            options.TransactionsQueueName = builder.Configuration["TransactionsQueueName"]!);
 
         services.AddSingleton<ITelegramBotClient>(new TelegramBotClient(builder.Configuration["TelegramBotToken"]!));
 

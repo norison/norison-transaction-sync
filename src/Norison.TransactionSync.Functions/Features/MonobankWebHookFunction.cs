@@ -1,27 +1,22 @@
 using System.Text.Json;
 
-using Azure.Messaging.ServiceBus;
+using Mediator;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 
 using Monobank.Client;
 
-using Norison.TransactionSync.Functions.Models;
-using Norison.TransactionSync.Functions.Options;
+using Norison.TransactionSync.Application.Features.Commands.ProcessMonoWebHookData;
 
 namespace Norison.TransactionSync.Functions.Features;
 
-public class MonobankWebHookFunction(
-    ServiceBusClient busClient,
-    IMemoryCache memoryCache,
-    IOptions<QueueOptions> options)
+public class MonobankWebHookFunction(ISender sender, IMemoryCache memoryCache)
 {
     [Function(nameof(MonobankWebHookFunction))]
-    public async Task<IActionResult> RunAsync(
+    public IActionResult RunAsync(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "monobank/{chatId}")]
         HttpRequest req)
     {
@@ -30,26 +25,26 @@ public class MonobankWebHookFunction(
             return new OkResult();
         }
 
-        using var reader = new StreamReader(req.Body);
-        var content = await reader.ReadToEndAsync();
-        var webHookModel = JsonSerializer.Deserialize<WebHookModel>(content);
-
-        if (webHookModel is null || memoryCache.TryGetValue(webHookModel.Data.StatementItem.Id, out _))
+        Task.Run(async () =>
         {
-            return new OkResult();
-        }
+            using var reader = new StreamReader(req.Body);
+            var content = await reader.ReadToEndAsync();
+            var webHookModel = JsonSerializer.Deserialize<WebHookModel>(content);
 
-        var chatId = long.Parse(req.RouteValues["chatId"]!.ToString()!);
-        var data = webHookModel.Data;
-        var transactionId = data.StatementItem.Id;
+            if (webHookModel is null || memoryCache.TryGetValue(webHookModel.Data.StatementItem.Id, out _))
+            {
+                return;
+            }
 
-        var @event = new TransactionEvent { ChatId = chatId, Data = data };
+            var chatId = long.Parse(req.RouteValues["chatId"]!.ToString()!);
+            var data = webHookModel.Data;
+            var transactionId = data.StatementItem.Id;
 
-        await using var sender = busClient.CreateSender(options.Value.TransactionsQueueName);
-        var message = new ServiceBusMessage(JsonSerializer.Serialize(@event));
-        await sender.SendMessageAsync(message);
+            memoryCache.Set(transactionId, transactionId, TimeSpan.FromMinutes(10));
 
-        memoryCache.Set(transactionId, transactionId, TimeSpan.FromMinutes(10));
+            var command = new ProcessMonoWebHookDataCommand { ChatId = chatId, WebHookData = webHookModel.Data };
+            await sender.Send(command);
+        });
 
         return new OkResult();
     }
