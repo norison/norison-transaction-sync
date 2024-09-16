@@ -27,26 +27,28 @@ public class MonobankWebHookFunction(ISender sender, IMemoryCache memoryCache)
 
         using var reader = new StreamReader(req.Body);
         var content = await reader.ReadToEndAsync();
+        var chatId = long.Parse(req.RouteValues["chatId"]!.ToString()!);
 
-        Task.Run(async () =>
-        {
-            var webHookModel = JsonSerializer.Deserialize<WebHookModel>(content);
-
-            if (webHookModel is null || memoryCache.TryGetValue(webHookModel.Data.StatementItem.Id, out _))
-            {
-                return;
-            }
-
-            var chatId = long.Parse(req.RouteValues["chatId"]!.ToString()!);
-            var data = webHookModel.Data;
-            var transactionId = data.StatementItem.Id;
-
-            memoryCache.Set(transactionId, transactionId, TimeSpan.FromMinutes(10));
-
-            var command = new ProcessMonoWebHookDataCommand { ChatId = chatId, WebHookData = data };
-            await sender.Send(command);
-        });
+        _ = ProcessWebHookData(chatId, content);
 
         return new OkResult();
+    }
+
+    private async Task ProcessWebHookData(long chatId, string content)
+    {
+        var webHookModel = JsonSerializer.Deserialize<WebHookModel>(content);
+
+        if (webHookModel is null || memoryCache.TryGetValue(webHookModel.Data.StatementItem.Id, out _))
+        {
+            return;
+        }
+
+        var data = webHookModel.Data;
+        var transactionId = data.StatementItem.Id;
+
+        memoryCache.Set(transactionId, transactionId, TimeSpan.FromMinutes(10));
+
+        var command = new ProcessMonoWebHookDataCommand { ChatId = chatId, WebHookData = data };
+        await sender.Send(command);
     }
 }
