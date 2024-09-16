@@ -16,7 +16,7 @@ namespace Norison.TransactionSync.Functions.Features;
 public class MonobankWebHookFunction(ISender sender, IMemoryCache memoryCache)
 {
     [Function(nameof(MonobankWebHookFunction))]
-    public IActionResult RunAsync(
+    public async Task<IActionResult> RunAsync(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "monobank/{chatId}")]
         HttpRequest req)
     {
@@ -25,10 +25,11 @@ public class MonobankWebHookFunction(ISender sender, IMemoryCache memoryCache)
             return new OkResult();
         }
 
+        using var reader = new StreamReader(req.Body);
+        var content = await reader.ReadToEndAsync();
+
         Task.Run(async () =>
         {
-            using var reader = new StreamReader(req.Body);
-            var content = await reader.ReadToEndAsync();
             var webHookModel = JsonSerializer.Deserialize<WebHookModel>(content);
 
             if (webHookModel is null || memoryCache.TryGetValue(webHookModel.Data.StatementItem.Id, out _))
