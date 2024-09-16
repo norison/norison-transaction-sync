@@ -42,7 +42,7 @@ public class MonobankWebHookFunction(ISender sender, IMemoryCache memoryCache)
 
             memoryCache.Set(transactionId, transactionId, TimeSpan.FromMinutes(10));
 
-            var command = new ProcessMonoWebHookDataCommand { ChatId = chatId, WebHookData = webHookModel.Data };
+            var command = new ProcessMonoWebHookDataCommand { ChatId = chatId, WebHookData = data };
             await sender.Send(command);
         });
 
