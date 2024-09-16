@@ -94,14 +94,12 @@ public class ProcessMonoWebHookDataCommandHandler(
 
         var lastBudgetId = await GetLastBudgetIdAsync(user, userInfo, cancellationToken);
 
-        var dateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(statement.Time, "Europe/Kiev");
-
         var newTransaction = new TransactionDbModel
         {
             IconUrl = "https://www.notion.so/icons/receipt_gray.svg",
             Name = description,
             Type = type,
-            Date = DateTime.SpecifyKind(dateTime, DateTimeKind.Local),
+            Date = statement.Time,
             AmountFrom = amountFrom,
             AmountTo = amountTo,
             Notes = statement.Comment,
@@ -134,20 +132,16 @@ public class ProcessMonoWebHookDataCommandHandler(
 
         foreach (var automation in validAutomations)
         {
-            if (!string.IsNullOrEmpty(automation.DescriptionIs))
+            if (!string.IsNullOrEmpty(automation.DescriptionIs) && string.Equals(statement.Description,
+                    automation.DescriptionIs, StringComparison.OrdinalIgnoreCase))
             {
-                if (string.Equals(statement.Description, automation.DescriptionIs, StringComparison.OrdinalIgnoreCase))
-                {
-                    return automation;
-                }
+                return automation;
             }
 
-            if (!string.IsNullOrEmpty(automation.DescriptionContains))
+            if (!string.IsNullOrEmpty(automation.DescriptionContains) &&
+                statement.Description.Contains(automation.DescriptionContains, StringComparison.OrdinalIgnoreCase))
             {
-                if (statement.Description.Contains(automation.DescriptionContains, StringComparison.OrdinalIgnoreCase))
-                {
-                    return automation;
-                }
+                return automation;
             }
         }
 
