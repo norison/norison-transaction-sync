@@ -8,6 +8,8 @@ using Norison.TransactionSync.Application.Models;
 using Norison.TransactionSync.Application.Services.Journal;
 using Norison.TransactionSync.Application.Services.Messages;
 using Norison.TransactionSync.Application.Services.Users;
+using Norison.TransactionSync.Persistence.Enums;
+using Norison.TransactionSync.Persistence.Models;
 using Norison.TransactionSync.Persistence.Storages;
 using Norison.TransactionSync.Persistence.Storages.Models;
 
@@ -92,21 +94,21 @@ public class ProcessMonoWebHookDataCommandHandler(
         var amountFrom = statement.Amount < 0 ? amount : (decimal?)null;
         var amountTo = statement.Amount > 0 ? amount : (decimal?)null;
 
-        var lastBudgetId = await GetLastBudgetIdAsync(user, userInfo, cancellationToken);
+        var budgetId = await GetBudgetIdAsync(user, userInfo, statement.Time, cancellationToken);
 
         var newTransaction = new TransactionDbModel
         {
             IconUrl = "https://www.notion.so/icons/receipt_gray.svg",
             Name = description,
             Type = type,
-            Date = statement.Time,
+            Date = new DateRange { StartDateTime = statement.Time },
             AmountFrom = amountFrom,
             AmountTo = amountTo,
             Notes = statement.Comment,
             AccountFromIds = accountFromId is null ? [] : [accountFromId],
             AccountToIds = accountToId is null ? [] : [accountToId],
             CategoryIds = categoryId is null ? [] : [categoryId],
-            BudgetIds = lastBudgetId is null ? [] : [lastBudgetId]
+            BudgetIds = budgetId is null ? [] : [budgetId]
         };
 
         await transactionsStorage.AddAsync(userInfo.TransactionsDatabaseId, newTransaction, cancellationToken);
@@ -114,12 +116,17 @@ public class ProcessMonoWebHookDataCommandHandler(
         await LogTransactionAsync(user.Username, statement, newTransaction, cancellationToken);
     }
 
-    private async Task<string?> GetLastBudgetIdAsync(
-        UserDbModel user, UserInfo userInfo, CancellationToken cancellationToken)
+    private async Task<string?> GetBudgetIdAsync(
+        UserDbModel user, UserInfo userInfo, DateTime time, CancellationToken cancellationToken)
     {
         var storage = storageFactory.GetBudgetsStorage(user.NotionToken);
 
-        var parameters = new DatabasesQueryParameters { PageSize = 1 };
+        var parameters = new DatabasesQueryParameters
+        {
+            PageSize = 1,
+            Filter = new DateFilter("Date Range", onOrBefore: time),
+            Sorts = [new Sort { Property = "Date Range", Direction = Direction.Descending }]
+        };
         var budget = await storage.GetFirstAsync(userInfo.BudgetsDatabaseId, parameters, cancellationToken);
         return budget?.Id;
     }

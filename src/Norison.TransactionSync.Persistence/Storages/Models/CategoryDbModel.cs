@@ -1,4 +1,5 @@
 using Norison.TransactionSync.Persistence.Attributes;
+using Norison.TransactionSync.Persistence.Enums;
 
 using Notion.Client;
 
