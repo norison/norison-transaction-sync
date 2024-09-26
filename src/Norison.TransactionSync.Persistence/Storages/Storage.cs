@@ -1,6 +1,7 @@
 using System.Reflection;
 
 using Norison.TransactionSync.Persistence.Attributes;
+using Norison.TransactionSync.Persistence.Models;
 
 using Notion.Client;
 
@@ -146,7 +147,7 @@ public class Storage<T>(INotionClient client, string databaseName) : IStorage<T>
             PropertyType.RichText => (propertyValue as RichTextPropertyValue)?.RichText?.FirstOrDefault()?.PlainText,
             PropertyType.Number => (propertyValue as NumberPropertyValue)?.Number,
             PropertyType.Checkbox => (propertyValue as CheckboxPropertyValue)?.Checkbox,
-            PropertyType.Date => (propertyValue as DatePropertyValue)?.Date?.Start,
+            PropertyType.Date => ConvertDateRangeToValue(propertyValue),
             PropertyType.Select => (propertyValue as SelectPropertyValue)?.Select?.Name,
             PropertyType.Relation => (propertyValue as RelationPropertyValue)?.Relation?.Select(x => x.Id).ToArray(),
             _ => throw new NotSupportedException($"Property type '{type}' is not supported.")
@@ -169,7 +170,7 @@ public class Storage<T>(INotionClient client, string databaseName) : IStorage<T>
                 ? null
                 : new NumberPropertyValue { Number = double.Parse(value.ToString()!) },
             PropertyType.Checkbox => new CheckboxPropertyValue { Checkbox = value is not null && (bool)value },
-            PropertyType.Date => new DatePropertyValue { Date = new Date { Start = (DateTime?)value } },
+            PropertyType.Date => ConvertDateRangeToPropertyValue((DateRange)value!),
             PropertyType.Select => new SelectPropertyValue
             {
                 Select = value is null ? null : new SelectOption { Name = value.ToString() }
@@ -181,6 +182,20 @@ public class Storage<T>(INotionClient client, string databaseName) : IStorage<T>
                     : (value as IEnumerable<string>)!.Select(x => new ObjectId { Id = x }).ToList()
             },
             _ => throw new NotSupportedException($"Property type '{type}' is not supported.")
+        };
+    }
+
+    private static DateRange ConvertDateRangeToValue(PropertyValue propertyValue)
+    {
+        var dateRange = propertyValue as DatePropertyValue;
+        return new DateRange { StartDateTime = dateRange?.Date?.Start, EndDateTime = dateRange?.Date?.End };
+    }
+
+    private static DatePropertyValue ConvertDateRangeToPropertyValue(DateRange dateRange)
+    {
+        return new DatePropertyValue
+        {
+            Date = new Date { Start = dateRange.StartDateTime, End = dateRange.EndDateTime }
         };
     }
 }

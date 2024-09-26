@@ -1,4 +1,4 @@
-namespace Norison.TransactionSync.Persistence.Storages.Models;
+namespace Norison.TransactionSync.Persistence.Enums;
 
 public enum TransactionType
 {

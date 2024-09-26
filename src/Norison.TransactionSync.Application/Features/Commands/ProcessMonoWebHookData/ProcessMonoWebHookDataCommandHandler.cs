@@ -8,6 +8,8 @@ using Norison.TransactionSync.Application.Models;
 using Norison.TransactionSync.Application.Services.Journal;
 using Norison.TransactionSync.Application.Services.Messages;
 using Norison.TransactionSync.Application.Services.Users;
+using Norison.TransactionSync.Persistence.Enums;
+using Norison.TransactionSync.Persistence.Models;
 using Norison.TransactionSync.Persistence.Storages;
 using Norison.TransactionSync.Persistence.Storages.Models;
 
@@ -69,12 +71,16 @@ public class ProcessMonoWebHookDataCommandHandler(
         UserDbModel user, UserInfo userInfo, Statement statement, CancellationToken cancellationToken)
     {
         var transactionsStorage = storageFactory.GetTransactionsStorage(user.NotionToken);
-        var automationsStorage = storageFactory.GetAutomationsStorage(user.NotionToken);
 
-        var automations =
-            await automationsStorage.GetAllAsync(userInfo.AutomationsDatabaseId, cancellationToken: cancellationToken);
+        var automationTask = GetAutomationAsync(user.NotionToken, statement.Description,
+            userInfo.AutomationsDatabaseId, cancellationToken);
 
-        var automation = FindAutomationForStatement(automations, statement);
+        var budgetIdTask =
+            GetBudgetIdAsync(user.NotionToken, userInfo.BudgetsDatabaseId, statement.Time, cancellationToken);
+
+        await Task.WhenAll(automationTask, budgetIdTask);
+
+        (AutomationsDbModel? automation, string? budgetId) = (await automationTask, await budgetIdTask);
 
         var description = string.IsNullOrEmpty(automation?.DescriptionOverride)
             ? statement.Description
@@ -92,21 +98,19 @@ public class ProcessMonoWebHookDataCommandHandler(
         var amountFrom = statement.Amount < 0 ? amount : (decimal?)null;
         var amountTo = statement.Amount > 0 ? amount : (decimal?)null;
 
-        var lastBudgetId = await GetLastBudgetIdAsync(user, userInfo, cancellationToken);
-
         var newTransaction = new TransactionDbModel
         {
             IconUrl = "https://www.notion.so/icons/receipt_gray.svg",
             Name = description,
             Type = type,
-            Date = statement.Time,
+            Date = new DateRange { StartDateTime = statement.Time },
             AmountFrom = amountFrom,
             AmountTo = amountTo,
             Notes = statement.Comment,
             AccountFromIds = accountFromId is null ? [] : [accountFromId],
             AccountToIds = accountToId is null ? [] : [accountToId],
             CategoryIds = categoryId is null ? [] : [categoryId],
-            BudgetIds = lastBudgetId is null ? [] : [lastBudgetId]
+            BudgetIds = budgetId is null ? [] : [budgetId]
         };
 
         await transactionsStorage.AddAsync(userInfo.TransactionsDatabaseId, newTransaction, cancellationToken);
@@ -114,32 +118,47 @@ public class ProcessMonoWebHookDataCommandHandler(
         await LogTransactionAsync(user.Username, statement, newTransaction, cancellationToken);
     }
 
-    private async Task<string?> GetLastBudgetIdAsync(
-        UserDbModel user, UserInfo userInfo, CancellationToken cancellationToken)
+    private async Task<string?> GetBudgetIdAsync(
+        string token, string databaseId, DateTime time, CancellationToken cancellationToken)
     {
-        var storage = storageFactory.GetBudgetsStorage(user.NotionToken);
+        var storage = storageFactory.GetBudgetsStorage(token);
 
-        var parameters = new DatabasesQueryParameters { PageSize = 1 };
-        var budget = await storage.GetFirstAsync(userInfo.BudgetsDatabaseId, parameters, cancellationToken);
+        var parameters = new DatabasesQueryParameters
+        {
+            PageSize = 1,
+            Filter = new DateFilter("Date Range", onOrBefore: time),
+            Sorts = [new Sort { Property = "Date Range", Direction = Direction.Descending }]
+        };
+        var budget = await storage.GetFirstAsync(databaseId, parameters, cancellationToken);
         return budget?.Id;
     }
 
-    private static AutomationsDbModel? FindAutomationForStatement(AutomationsDbModel[] automations, Statement statement)
+    private async Task<AutomationsDbModel?> GetAutomationAsync(
+        string token, string description, string databaseId, CancellationToken cancellationToken)
     {
-        var validAutomations = automations
-            .Where(x => !string.IsNullOrEmpty(x.DescriptionIs) || !string.IsNullOrEmpty(x.DescriptionContains))
-            .ToArray();
+        var storage = storageFactory.GetAutomationsStorage(token);
 
-        foreach (var automation in validAutomations)
+        var parameters = new DatabasesQueryParameters
         {
-            if (!string.IsNullOrEmpty(automation.DescriptionIs) && string.Equals(statement.Description,
+            Filter = new CompoundFilter(or:
+            [
+                new RichTextFilter("Description Is", isNotEmpty: true),
+                new RichTextFilter("Description Contains", isNotEmpty: true)
+            ])
+        };
+
+        var automations = await storage.GetAllAsync(databaseId, parameters, cancellationToken);
+
+        foreach (var automation in automations)
+        {
+            if (!string.IsNullOrEmpty(automation.DescriptionIs) && string.Equals(description,
                     automation.DescriptionIs, StringComparison.OrdinalIgnoreCase))
             {
                 return automation;
             }
 
             if (!string.IsNullOrEmpty(automation.DescriptionContains) &&
-                statement.Description.Contains(automation.DescriptionContains, StringComparison.OrdinalIgnoreCase))
+                description.Contains(automation.DescriptionContains, StringComparison.OrdinalIgnoreCase))
             {
                 return automation;
             }
