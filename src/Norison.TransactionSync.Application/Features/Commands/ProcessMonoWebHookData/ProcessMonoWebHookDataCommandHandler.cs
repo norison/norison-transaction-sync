@@ -71,12 +71,16 @@ public class ProcessMonoWebHookDataCommandHandler(
         UserDbModel user, UserInfo userInfo, Statement statement, CancellationToken cancellationToken)
     {
         var transactionsStorage = storageFactory.GetTransactionsStorage(user.NotionToken);
-        var automationsStorage = storageFactory.GetAutomationsStorage(user.NotionToken);
 
-        var automations =
-            await automationsStorage.GetAllAsync(userInfo.AutomationsDatabaseId, cancellationToken: cancellationToken);
+        var automationTask = GetAutomationAsync(user.NotionToken, statement.Description,
+            userInfo.AutomationsDatabaseId, cancellationToken);
 
-        var automation = FindAutomationForStatement(automations, statement);
+        var budgetIdTask =
+            GetBudgetIdAsync(user.NotionToken, userInfo.BudgetsDatabaseId, statement.Time, cancellationToken);
+
+        await Task.WhenAll(automationTask, budgetIdTask);
+
+        (AutomationsDbModel? automation, string? budgetId) = (await automationTask, await budgetIdTask);
 
         var description = string.IsNullOrEmpty(automation?.DescriptionOverride)
             ? statement.Description
@@ -93,8 +97,6 @@ public class ProcessMonoWebHookDataCommandHandler(
         var amount = Math.Abs(statement.Amount) / 100m;
         var amountFrom = statement.Amount < 0 ? amount : (decimal?)null;
         var amountTo = statement.Amount > 0 ? amount : (decimal?)null;
-
-        var budgetId = await GetBudgetIdAsync(user, userInfo, statement.Time, cancellationToken);
 
         var newTransaction = new TransactionDbModel
         {
@@ -117,9 +119,9 @@ public class ProcessMonoWebHookDataCommandHandler(
     }
 
     private async Task<string?> GetBudgetIdAsync(
-        UserDbModel user, UserInfo userInfo, DateTime time, CancellationToken cancellationToken)
+        string token, string databaseId, DateTime time, CancellationToken cancellationToken)
     {
-        var storage = storageFactory.GetBudgetsStorage(user.NotionToken);
+        var storage = storageFactory.GetBudgetsStorage(token);
 
         var parameters = new DatabasesQueryParameters
         {
@@ -127,26 +129,36 @@ public class ProcessMonoWebHookDataCommandHandler(
             Filter = new DateFilter("Date Range", onOrBefore: time),
             Sorts = [new Sort { Property = "Date Range", Direction = Direction.Descending }]
         };
-        var budget = await storage.GetFirstAsync(userInfo.BudgetsDatabaseId, parameters, cancellationToken);
+        var budget = await storage.GetFirstAsync(databaseId, parameters, cancellationToken);
         return budget?.Id;
     }
 
-    private static AutomationsDbModel? FindAutomationForStatement(AutomationsDbModel[] automations, Statement statement)
+    private async Task<AutomationsDbModel?> GetAutomationAsync(
+        string token, string description, string databaseId, CancellationToken cancellationToken)
     {
-        var validAutomations = automations
-            .Where(x => !string.IsNullOrEmpty(x.DescriptionIs) || !string.IsNullOrEmpty(x.DescriptionContains))
-            .ToArray();
+        var storage = storageFactory.GetAutomationsStorage(token);
 
-        foreach (var automation in validAutomations)
+        var parameters = new DatabasesQueryParameters
         {
-            if (!string.IsNullOrEmpty(automation.DescriptionIs) && string.Equals(statement.Description,
+            Filter = new CompoundFilter(or:
+            [
+                new RichTextFilter("Description Is", isNotEmpty: true),
+                new RichTextFilter("Description Contains", isNotEmpty: true)
+            ])
+        };
+
+        var automations = await storage.GetAllAsync(databaseId, parameters, cancellationToken);
+
+        foreach (var automation in automations)
+        {
+            if (!string.IsNullOrEmpty(automation.DescriptionIs) && string.Equals(description,
                     automation.DescriptionIs, StringComparison.OrdinalIgnoreCase))
             {
                 return automation;
             }
 
             if (!string.IsNullOrEmpty(automation.DescriptionContains) &&
-                statement.Description.Contains(automation.DescriptionContains, StringComparison.OrdinalIgnoreCase))
+                description.Contains(automation.DescriptionContains, StringComparison.OrdinalIgnoreCase))
             {
                 return automation;
             }
