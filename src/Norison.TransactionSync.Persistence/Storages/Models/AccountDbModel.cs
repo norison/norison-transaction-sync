@@ -11,4 +11,10 @@ public class AccountDbModel : IDbModel
 
     [NotionProperty("Name", PropertyType.Title)]
     public string? Name { get; set; }
+    
+    [NotionProperty("Ticker", PropertyType.Checkbox)]
+    public bool? Ticker { get; set; }
+    
+    [NotionProperty("Price", PropertyType.Number)]
+    public decimal? Price { get; set; }
 }
