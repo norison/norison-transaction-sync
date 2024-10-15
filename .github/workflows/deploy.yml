@@ -4,6 +4,9 @@
 name: Deploy
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 env:
@@ -41,9 +44,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B8DDCEC03229434688A8ABA7FAABF4B6 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5EE67DAC66934C0C945C6B7F10CB054D }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2789C1F0FE95402ABF7A95AB12323898 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_2B430ADC20A04F639D082DF38278AE7A }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_59F316C7982C408CA54E47AEDA21CC61 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3B59207399DB4EB0B826FD83E17E0084 }}
 
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
