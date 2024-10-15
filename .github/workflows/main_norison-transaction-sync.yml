@@ -4,9 +4,6 @@
 name: Build and deploy dotnet core app to Azure Function App - norison-transaction-sync
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 env:
@@ -27,6 +24,12 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+          
+      - name: Add Telegram.Bot nuget source
+        run: dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
+
+      - name: Add GitHub nuget source
+        run: dotnet nuget add source https://nuget.pkg.github.com/norison/index.json -n GitHub -u norison -p ${{ secrets.NUGET_TOKEN }} --store-password-in-clear-text
 
       - name: 'Resolve Project Dependencies Using Dotnet'
         shell: pwsh
