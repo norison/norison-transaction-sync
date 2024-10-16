@@ -12,7 +12,7 @@ env:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       id-token: write #This is required for requesting the JWT
 
@@ -32,7 +32,7 @@ jobs:
         run: dotnet nuget add source https://nuget.pkg.github.com/norison/index.json -n GitHub -u norison -p ${{ secrets.NUGET_TOKEN }} --store-password-in-clear-text
 
       - name: 'Resolve Project Dependencies Using Dotnet'
-        shell: bash
+        shell: pwsh
         run: |
           pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
           dotnet build --configuration Release --output ./output
@@ -41,9 +41,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B44F6CE6762B4A81BEA847AF8C278826 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8FDF704BD02243FEA86BCE71089A63BE }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A9F24636A6B84FE8B3F128B43C8D4687 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_2405C0A587504F9B8FFC0233F9522CCB }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E50F0CA54E0A40BABE41F52B434485FD }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9E135BF0D3C547EA9C9D8A82A0E0CB2B }}
 
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
